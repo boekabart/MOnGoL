@@ -20,8 +20,8 @@ namespace MOnGoL.WebAssembly
             var uri = new Uri(builder.HostEnvironment.BaseAddress);
             var apiUri = uri;// new Uri($"http://{uri.Host}:5000/");
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = apiUri });
-            builder.Services.AddScoped<Common.IWeatherForecastService, Backend.Client.WeatherForecastServiceWebClient>();
-            builder.Services.AddScoped<Common.ICounterService, Backend.Client.CounterServiceWebClient>();
+            builder.Services.AddScoped<Common.IPlayerService, Backend.Client.PlayerServiceWebClient>();
+            builder.Services.AddScoped<Common.IPlayerBoardService, Backend.Client.PlayerBoardServiceWebClient>();
 
             await builder.Build().RunAsync();
         }

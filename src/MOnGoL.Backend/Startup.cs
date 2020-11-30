@@ -7,8 +7,10 @@ namespace MOnGoL.Backend
     {
         public static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IWeatherForecastService, WeatherForecastService>();
-            services.AddSingleton<ICounterService, CounterService>();
+            services.AddSingleton<IPlayersService, PlayersService>();
+            services.AddSingleton<IBoardService, GameOfLifeBoardService>();
+            services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IPlayerBoardService, PlayerBoardService>();
         }
     }
 }

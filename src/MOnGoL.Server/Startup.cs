@@ -27,7 +27,8 @@ namespace MOnGoL.Backend.Controller
                     new[] { "application/octet-stream" });
             });
 
-            services.AddSingleton<CounterHubService>();
+            services.AddScoped<PlayerHub.Service>();
+            services.AddScoped<PlayerBoardHub.Service>();
             return services;
         }
 
@@ -38,7 +39,8 @@ namespace MOnGoL.Backend.Controller
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<CounterHub>("/hubs/counter");
+                endpoints.MapHub<PlayerHub>("/hubs/player");
+                endpoints.MapHub<PlayerBoardHub>("/hubs/playerboard");
             });
         }
     }

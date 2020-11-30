@@ -1,36 +1,64 @@
 ﻿@page "/counter"
 @using Common
-@inject ICounterService CounterService
+@using System.Collections.Immutable
+@inject IPlayerService PlayerService
 <h1>Counter</h1>
 
-<p>Current count: @(currentCount?.ToString()?? "⌛")</p>
+<p>Current count: @(currentCount?.Count.ToString()?? "⌛")</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
+<div class="row">
+    @if (MyInfo is null)
+    {
+        <input @bind="Name" />
+        <input @bind="Emoji" maxlength="1" />
+        <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
+    }
+    else
+    {
+        <span>@MyInfo.Name</span>
+        <span>@MyInfo.Token.Emoji</span>
+    }
+</div>
 @code {
 
-    private int? currentCount = null;
+    private string Name = String.Empty;
+    private string Emoji = String.Empty;
+    private PlayerInfo? MyInfo { get; set; }
 
-    protected override void OnInitialized()
+    private IImmutableList<PlayerInfo>? currentCount = null;
+
+    protected override async Task OnInitializedAsync()
     {
-        CounterService.OnNewValue += OnNewValue;
-        base.OnInitialized();
+        await base.OnInitializedAsync();
+        PlayerService.OnPlayerlistChanged += OnNewValue;
+        MyInfo = await PlayerService.GetMyInfo();
+        currentCount = await PlayerService.GetPlayerlist();
     }
 
-    private async void OnNewValue(object sender, int newValue)
+    private async void OnNewValue(object sender, IImmutableList<PlayerInfo> newValue)
     {
         currentCount = newValue;
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task IncrementCount()
+    private bool CanRegister => !string.IsNullOrEmpty(Emoji) && !string.IsNullOrEmpty(Name);
+
+    private async Task Register()
     {
-        currentCount = null;
-        await CounterService.Increment(1);
+        if (!CanRegister)
+            return;
+        if (MyInfo is not null)
+            return;
+
+        MyInfo = await PlayerService.Register(
+        new PlayerInfo(Name,
+            new Token(Emoji[0])
+            )
+        );
     }
 
     public void Dispose()
     {
-        CounterService.OnNewValue -= OnNewValue;
+        PlayerService.OnPlayerlistChanged -= OnNewValue;
     }
 }
