@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MyProject.Host.Combi</title>
+    <base href="" />
+    <link href="_content/MyProject.FrontEnd/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="_content/MyProject.Frontend/css/site.css" rel="stylesheet" />
+    <style>
+        .jumbotron {
+            background: #7014e8;
+            background-image: url(https://dotnet.microsoft.com/static/images/redesign/home-hero-bg.svg);
+            background-image: url(https://dotnet.microsoft.com/static/images/redesign/home-hero-bg.svg),linear-gradient(180deg,#7014e8 30.12%,#0e5ecf 192.47%);
+        }
+    </style>
+</head>
+
+<body class="jumbotron">
+    <div class="main container text-white">
+        <div class="row justify-content-center mt-6">
+            <h1 class="text-white">Blazor</h1>
+        </div>
+        <div class="row justify-content-center mt-6">
+            <h2 class="text-white">Build client web apps with C#</h2>
+        </div>
+        <div class="row">
+            <hr />
+        </div>
+        <div class="row justify-content-center mt-6">
+            <div class="btn-group" role="group" aria-label="Choose your poison">
+                <a href="/wasm/home" class="btn btn-light btn-lg btn-scale" role="button">WebAssembly</a>
+                <a href="/iframe.html" class="btn btn-dark btn-lg btn-scale" role="button">&lt; Side by Side &gt;</a>
+                <a href="/serverside/home" class="btn btn-light btn-lg btn-scale" role="button">Server-side</a>
+            </div>
+        </div>
+        <div class="row">
+            <hr />
+        </div>
+        <div class="row mt-6">
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6 px-6 py-6">
+                <h4>Welcome!</h4>
+                <p>
+                    This project has a whole bunch of projects.
+                    At the root, there are 3 projects that implement the actual logic of the application:
+                </p>
+                <ul>
+                    <li>Common (backend service interface & data classes)</li>
+                    <li>Frontend (razor pages - html+css with C# code-behind)</li>
+                    <li>Backend (logic that must run on the backend, such as interactions with DB, Disk, shared state etc.)</li>
+                </ul>
+                <p>This code is 100% common for the 2 deployment models of Blazor (for web): Server-side and WebAssembly</p>
+                <hr />
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6 px-6 py-6">
+                <h4>Server-side Blazor</h4>
+                <p>In this model, the server does all the work. It serves the client with some HTML, css and js; the client then connects with the server over SignalR, an the server then uses this connection to push DOM changes to the client, and to receive user input from the client. Hardly any javascript is needed at all (other than the small library Blazor packs). Because all logic is executed on the server, the 'page code' can directly use the backend implementation to access file stogage, database etc. The server keeps global and per-session state (managed via Scoped DI and GC). Overhead per session is said to be about 85 kB, so thousands of clients on a single node are possible, depending on the amount of cores &amp; work that needs to be done. Because the programming model supports callbacks to the page/component code, server-initiated DOM updates are trivial.</p>
+                <p>In order to actually run the application in this mode, only 1 extra project is needed</p>
+                <ul>
+                    <li>Hosts.BlazorServer (console host, imports both Frontend and Backend projects)</li>
+                </ul>
+                <p>DI is set up to let the frontend know about the actual (direct)backend implementation, and then a factory-default hosting is set up for serving the frontend</p>
+                <hr />
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6 px-6 py-6">
+                <h4>WebAssembly Blazor</h4>
+                <p>In this model, the browser does all the work that's programmed into the components and pages. The server (or CDN) serves the initial HTML, css and blazor wasm.js to the browser, along with a small .NET 5 runtime in webassembly, and the required .NET assemblies. The Blazor Wasm compiler aggressively strips all user- and framework assemblies from not used code, and packs it all up into a small compressed package.</p>
+                <p>If the app doesn't actually use any true backend services or shared state, all that's needed now is a single project that compiles the code in the above Frontend project to wasm files - in a similar way to how npm compiles an Angular app to 'Just a bunch of Files'. In Blazor, this project CAN be used to also serve the application without completely packing it (similar to npm, again), for quick developement purposes.</p>
+                <ul>
+                    <li>WebAssembly (wasm compiler &amp; dev-time console host)</li>
+                </ul>
+                <p>But if the app needs to interact with a backend at all, it obviously can't do that by directly using the Backend implementation that the server-side Blazor can. We need to tunnel the <code>IBackend</code> interface over HTTP. This can be done in any way you like, as long as you can build C# server- and client classes for them. gRPC is a good way to do this, especially if the Backend interface contains callbacks or other server-client communication models. But in this example we use REST and SignalR (websockets). In order to achieve this, we implement 2 projects:                    </p>
+                <ul>
+                    <li>Backend.Client (REST &amp; SignalR clients, implementing the various <code>IBackend</code>) interfaces</li>
+                    <li>Backend.Controller (WebApi Controllers and SignalR Hubs that only 'proxy' to the <code>IBackend</code>) interfaces)</li>
+                    <li>Hosts.WebApi (console host, imports Backend and Backend.Controller)</li>
+                </ul>
+                <p>This last project sets up DI to use the actual backend services, and hosts the controllers and hubs. The WebAssembly project now imports the Backend.Client and sets up DI so the pages can use them. Now pages running client-side can use IBackend just like they can when running server-side.</p>
+                <hr />
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6 px-6 py-6">
+                <h4>Cloud Native</h4>
+                <p>Following the above, the deployment models possible are:</p>
+                <ul>
+                    <li>
+                        Server-side:
+                        <ul>
+                            <li>Single/cluster of container(s) hosting app</li>
+                        </ul>
+                    </li>
+                    <li>
+                        WebAssembly:
+                        <ul>
+                            <li>1 CDN hosting Frontend Wasm, container(s) hosting server, gateway to share URL, or proper CORS setup</li>
+                            <li>1 CDN hosting Frontend Wasm, cloud functions implementing REST APIs (using Backend library)</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>If cloud functions are not an option anyway, there is another option:</p>
+                <ul>
+                    <li>
+                        WebAssembly:
+                        <ul>
+                            <li>Single container hosting server and Wasm - no gateway needed</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>And if we really want to show off (or in case there is a real use case for allowing end users to switch between server-side and client-side):</p>
+                <ul>
+                    <li>
+                        Hybrid:
+                        <ul>
+                            <li>Single container hosting API/Hubs, Wasm and server-side Blazor</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>And this is the solution showcased in this demo!</p>
+                <hr />
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <h3 class="text-white">Choose your poison:</h3>
+        </div>
+        <div class="row justify-content-center">
+            <div class="btn-group" role="group" aria-label="Choose your poison">
+                <a href="/wasm/home" class="btn btn-light btn-lg btn-scale" role="button">WebAssembly</a>
+                <a href="/iframe.html" class="btn btn-dark btn-lg btn-scale" role="button">&lt; Side by Side &gt;</a>
+                <a href="/serverside/home" class="btn btn-light btn-lg btn-scale" role="button">Server-side</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
