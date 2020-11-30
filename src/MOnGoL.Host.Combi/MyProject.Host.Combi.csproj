@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MOnGoL.Server\MOnGoL.Server.csproj" />
+    <ProjectReference Include="..\MOnGoL.Backend\MOnGoL.Backend.csproj" />
+    <ProjectReference Include="..\MOnGoL.ServerSide\MOnGoL.ServerSide.csproj" />
+    <ProjectReference Include="..\MOnGoL.WebAssembly\MOnGoL.WebAssembly.csproj" />
+  </ItemGroup>
+
+</Project>
