@@ -1,16 +1,14 @@
 ﻿@page "/counter"
-@using Common
-@using System.Collections.Immutable
-@inject IPlayerService PlayerService
 <h1>Counter</h1>
 
-<p>Current count: @(currentCount?.Count.ToString()?? "⌛")</p>
+<p>Current count: @(playerList?.Count.ToString()?? "⌛")</p>
 
 <div class="row">
     @if (MyInfo is null)
     {
-        <input @bind="Name" />
-        <input @bind="Emoji" maxlength="1" />
+        <input @bind="Name"  @bind:event="oninput" />
+        <input @bind="EmojiText" @bind:event="oninput" />
+        <span>@Emoji</span>
         <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
     }
     else
@@ -19,46 +17,22 @@
         <span>@MyInfo.Token.Emoji</span>
     }
 </div>
-@code {
 
-    private string Name = String.Empty;
-    private string Emoji = String.Empty;
-    private PlayerInfo? MyInfo { get; set; }
-
-    private IImmutableList<PlayerInfo>? currentCount = null;
-
-    protected override async Task OnInitializedAsync()
+<div class="row">
+    @if (playerList is not null)
     {
-        await base.OnInitializedAsync();
-        PlayerService.OnPlayerlistChanged += OnNewValue;
-        MyInfo = await PlayerService.GetMyInfo();
-        currentCount = await PlayerService.GetPlayerlist();
+        <table class="table">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Emoji</th>
+            </tr>
+            @foreach (var playerInfo in playerList)
+            {
+                <tr>
+                    <td>@playerInfo.Name</td>
+                    <td>@playerInfo.Token.Emoji</td>
+                </tr>
+            }
+        </table>
     }
-
-    private async void OnNewValue(object sender, IImmutableList<PlayerInfo> newValue)
-    {
-        currentCount = newValue;
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private bool CanRegister => !string.IsNullOrEmpty(Emoji) && !string.IsNullOrEmpty(Name);
-
-    private async Task Register()
-    {
-        if (!CanRegister)
-            return;
-        if (MyInfo is not null)
-            return;
-
-        MyInfo = await PlayerService.Register(
-        new PlayerInfo(Name,
-            new Token(Emoji[0])
-            )
-        );
-    }
-
-    public void Dispose()
-    {
-        PlayerService.OnPlayerlistChanged -= OnNewValue;
-    }
-}
+</div>

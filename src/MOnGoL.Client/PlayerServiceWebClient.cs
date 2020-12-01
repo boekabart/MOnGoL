@@ -26,6 +26,7 @@ namespace MOnGoL.Backend.Client
         private EventHandler<IImmutableList<PlayerInfo>> onPlayerlistChanged;
         private HubConnection hubConnection;
         private IImmutableList<PlayerInfo> lastPlayerlist;
+        private Task connectTask;
 
         public EventHandler<IImmutableList<PlayerInfo>> OnPlayerlistChanged
         {
@@ -55,6 +56,7 @@ namespace MOnGoL.Backend.Client
         {
             await Connect();
             await hubConnection.SendAsync("Leave");
+            await hubConnection.StopAsync();
         }
 
         public async Task<PlayerInfo?> Register(PlayerInfo myInfo)
@@ -65,10 +67,17 @@ namespace MOnGoL.Backend.Client
 
         private async Task Connect()
         {
-            if (hubConnection.State != HubConnectionState.Connected)
+            if (hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.StartAsync();
-                await hubConnection.SendAsync("Increment", 0);
+                return;
+            }
+            else if (hubConnection.State == HubConnectionState.Disconnected)
+            {
+                await (connectTask = hubConnection.StartAsync());
+            }
+            else if (connectTask is not null)
+            {
+                await connectTask;
             }
         }
     }
