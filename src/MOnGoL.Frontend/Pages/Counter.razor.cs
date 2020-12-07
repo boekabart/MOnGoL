@@ -91,10 +91,11 @@ namespace MOnGoL.Frontend.Pages
                 Logger.LogDebug("Server refused, apparently that would be a conflict with an already registered player");
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             PlayerService.OnPlayerlistChanged -= OnNewValue;
-            await PlayerService.Leave();
+            //await PlayerService.Leave();
+            return ValueTask.CompletedTask;
         }
     }
 }
