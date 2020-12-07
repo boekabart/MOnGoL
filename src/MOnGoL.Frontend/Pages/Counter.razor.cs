@@ -56,6 +56,7 @@ namespace MOnGoL.Frontend.Pages
                     Name = storedInfo.Name;
                     EmojiText = storedInfo.Token.Emoji.ToString();
                 }
+                this.StateHasChanged();
             }
         }
 
@@ -77,7 +78,7 @@ namespace MOnGoL.Frontend.Pages
             Logger.LogDebug("Trying to register playerInfo");
             MyInfo = await PlayerService.Register(
             new PlayerInfo(Name,
-                new Token(Rune.GetRuneAt(Emoji, 0))
+                new Token(Rune.GetRuneAt(Emoji, 0).ToString())
                 )
             );
             if (MyInfo is not null)
