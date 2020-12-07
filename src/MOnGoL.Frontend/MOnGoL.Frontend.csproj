@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="EmojiData" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
   </ItemGroup>

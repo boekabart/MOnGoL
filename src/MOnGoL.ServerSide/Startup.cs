@@ -22,6 +22,7 @@ namespace MOnGoL.ServerSide
             services.AddRazorPages()
                 .AddApplicationPart(typeof(Startup).Assembly);
             services.AddServerSideBlazor();
+            Frontend.Startup.ConfigureServices(services);
         }
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)

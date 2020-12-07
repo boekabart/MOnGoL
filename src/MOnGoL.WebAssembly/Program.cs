@@ -17,6 +17,7 @@ namespace MOnGoL.WebAssembly
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<Frontend.App>("#app");
 
+            Frontend.Startup.ConfigureServices(builder.Services);
             var uri = new Uri(builder.HostEnvironment.BaseAddress);
             var apiUri = uri;// new Uri($"http://{uri.Host}:5000/");
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = apiUri });
