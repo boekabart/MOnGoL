@@ -13,7 +13,7 @@ namespace MOnGoL.Backend
 
         public GameOfLifeBoardService()
         {
-            _theBoard = new Board(21, 21);
+            _theBoard = Board.Create(21, 21);
         }
 
         public EventHandler<ChangeSet> OnBoardChanged { get; set; }

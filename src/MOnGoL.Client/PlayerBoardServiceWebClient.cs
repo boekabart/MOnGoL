@@ -30,6 +30,7 @@ namespace MOnGoL.Backend.Client
         private EventHandler<ChangeSet> onBoardChanged;
         private HubConnection hubConnection;
         private Board _theBoard;
+        private Task connectTask;
 
         public EventHandler<ChangeSet> OnBoardChanged
         {
@@ -59,10 +60,17 @@ namespace MOnGoL.Backend.Client
 
         private async Task Connect()
         {
-            if (hubConnection.State != HubConnectionState.Connected)
+            if (hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.StartAsync();
-                await GetBoard();
+                return;
+            }
+            else if (hubConnection.State == HubConnectionState.Disconnected)
+            {
+                await (connectTask = hubConnection.StartAsync());
+            }
+            else if (connectTask is not null)
+            {
+                await connectTask;
             }
         }
     }
