@@ -1,38 +1,18 @@
 ﻿@page "/counter"
-<h1>Counter</h1>
-
-<p>Current count: @(playerList?.Count.ToString()?? "⌛")</p>
+<h1>Five-in-a-row Game-of-Life</h1>
 
 <div class="row">
-    @if (MyInfo is null)
-    {
-        <input @bind="Name"  @bind:event="oninput" />
-        <input @bind="EmojiText" @bind:event="oninput" />
-        <span>@Emoji</span>
-        <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
-    }
-    else
-    {
-        <span>@MyInfo.Name</span>
-        <span>@MyInfo.Token.Emoji</span>
-    }
+    <div class="col col-6">
+        <Login />
+    </div>
 </div>
-
 <div class="row">
-    @if (playerList is not null)
-    {
-        <table class="table">
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Emoji</th>
-            </tr>
-            @foreach (var playerInfo in playerList)
-            {
-                <tr>
-                    <td>@playerInfo.Name</td>
-                    <td>@playerInfo.Token.Emoji</td>
-                </tr>
-            }
-        </table>
-    }
+    <div class="col col-6">
+        <Board />
+    </div>
+</div>
+<div class="row">
+    <div class="col col-6">
+        <PlayerList />
+    </div>
 </div>

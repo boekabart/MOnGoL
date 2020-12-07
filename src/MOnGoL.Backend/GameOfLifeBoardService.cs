@@ -10,6 +10,12 @@ namespace MOnGoL.Backend
     {
         private Board _theBoard;
         private SemaphoreSlim _lock = new SemaphoreSlim(1);
+
+        public GameOfLifeBoardService()
+        {
+            _theBoard = new Board(21, 21);
+        }
+
         public EventHandler<ChangeSet> OnBoardChanged { get; set; }
 
         public async Task<Board> GetBoard()

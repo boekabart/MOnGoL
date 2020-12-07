@@ -1,0 +1,22 @@
+﻿<table class="table">
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Emoji</th>
+    </tr>
+    @if (playerList is not null)
+    {
+        @foreach (var playerInfo in playerList)
+        {
+            <tr>
+                <td>@playerInfo.Name</td>
+                <td>@playerInfo.Token.Emoji</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="2">Loading...</td>
+        </tr>
+    }
+</table>

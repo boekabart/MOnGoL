@@ -1,0 +1,14 @@
+﻿<div class="row">
+    @if (MyInfo is null)
+    {
+        <input @bind="Name" @bind:event="oninput" />
+        <button class="btn btn-secondary" @onclick="RandomEmoji">Random</button>
+        <input @bind="EmojiText" @bind:event="oninput" />
+        <span>@Emoji</span>
+        <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="Leave">Log off</button>
+    }
+</div>

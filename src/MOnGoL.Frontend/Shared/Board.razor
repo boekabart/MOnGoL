@@ -1,0 +1,28 @@
+﻿<table class="table table-bordered">
+    @if (board is not null)
+    {
+        @foreach (var row in Rows)
+        {
+            <tr>
+            @foreach (var coor in row)
+            {
+                var emo = @Coor(coor);
+                if (emo is null)
+                {
+                    <td class="p-0 text-center align-middle"><button class="btn btn-light" @onclick="@(e => Put(coor))">&nbsp;</button></td>
+                }
+                else
+                {
+                    <td class ="p-0 text-center align-middle">@emo</td>
+                }
+            }
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td>Loading...</td>
+        </tr>
+    }
+</table>
