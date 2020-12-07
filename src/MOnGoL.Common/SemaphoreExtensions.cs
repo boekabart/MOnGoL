@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MOnGoL.Backend
+namespace MOnGoL.Common
 {
     public static class SemaphoreExtensions
     {
-        public static async Task<IDisposable> DisposableEnter( this SemaphoreSlim semaphore)
+        public static async Task<IDisposable> DisposableEnter(this SemaphoreSlim semaphore)
         {
             await semaphore.WaitAsync();
             return new ReleaseDisposable(semaphore);
@@ -16,7 +16,7 @@ namespace MOnGoL.Backend
         {
             private SemaphoreSlim enteredSemaphore;
 
-            public ReleaseDisposable( SemaphoreSlim enteredSemaphore)
+            public ReleaseDisposable(SemaphoreSlim enteredSemaphore)
             {
                 this.enteredSemaphore = enteredSemaphore;
             }

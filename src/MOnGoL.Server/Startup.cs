@@ -27,8 +27,9 @@ namespace MOnGoL.Backend.Controller
                     new[] { "application/octet-stream" });
             });
 
-            services.AddScoped<PlayerHub.Service>();
-            services.AddScoped<PlayerBoardHub.Service>();
+            services.AddSingleton<SignalRScopeService>();
+            services.AddSingleton<PlayerHub.Service>();
+            services.AddSingleton<PlayerBoardHub.Service>();
             return services;
         }
 

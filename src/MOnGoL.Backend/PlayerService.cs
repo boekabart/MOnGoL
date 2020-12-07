@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MOnGoL.Backend
 {
-    public class PlayerService : IPlayerService, IDisposable
+    public class PlayerService : IPlayerService, IAsyncDisposable
     {
         private ILogger<PlayerService> Logger { get; set; }
         public PlayerService(IPlayersService playersService, ILogger<PlayerService> logger)
@@ -25,12 +25,6 @@ namespace MOnGoL.Backend
         public EventHandler<IImmutableList<PlayerInfo>> OnPlayerlistChanged { get; set;  }
         private IPlayersService PlayersService { get; }
         private PlayerInfo? _myInfo;
-
-        public void Dispose()
-        {
-            Logger.LogInformation("Dispose()");
-            PlayersService.OnPlayerlistChanged -= OnGlobalPlayerlistChanged;
-        }
 
         public Task<PlayerInfo> GetMyInfo()
         {
@@ -57,6 +51,13 @@ namespace MOnGoL.Backend
                 return _myInfo;
             Logger.LogInformation("Registering with PS");
             return _myInfo = await PlayersService.Register(myInfo);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            Logger.LogInformation("Dispose()");
+            await Leave();
+            PlayersService.OnPlayerlistChanged -= OnGlobalPlayerlistChanged;
         }
     }
 }

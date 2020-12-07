@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using MOnGoL.Common;
 using System;
 using System.Collections.Immutable;
@@ -6,23 +7,26 @@ using System.Threading.Tasks;
 
 namespace MOnGoL.Backend.Controller.Hubs
 {
+
     public class PlayerHub : Hub
     {
+        public Service HubService { get; }
+
         public class Service : IDisposable
         {
             private readonly IHubContext<PlayerHub> hubContext;
-            private readonly IPlayerService playerService;
+            private readonly IPlayersService playersService;
 
-            public Service(IHubContext<PlayerHub> hubContext, IPlayerService playerService)
+            public Service(IHubContext<PlayerHub> hubContext, IPlayersService playersService)
             {
                 this.hubContext = hubContext;
-                this.playerService = playerService;
-                playerService.OnPlayerlistChanged += OnPlayerlistChanged;
+                this.playersService = playersService;
+                playersService.OnPlayerlistChanged += OnPlayerlistChanged;
             }
 
             public void Dispose()
             {
-                playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
+                playersService.OnPlayerlistChanged -= OnPlayerlistChanged;
             }
 
             private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerInfo> e)
@@ -31,31 +35,40 @@ namespace MOnGoL.Backend.Controller.Hubs
             }
         }
 
-        private readonly IPlayerService playerService;
+        public SignalRScopeService ScopeService { get; }
 
-        public PlayerHub( IPlayerService playerService, Service _)
+        public PlayerHub(SignalRScopeService scopeService, Service _)
         {
-            this.playerService = playerService;
+            ScopeService = scopeService;
         }
 
-        public Task<PlayerInfo> GetMyInfo()
+        public async Task<PlayerInfo> GetMyInfo()
         {
-            return playerService.GetMyInfo();
+            var playerService = await GetPlayerService();
+            return await playerService.GetMyInfo();
         }
 
-        public Task<IImmutableList<PlayerInfo>> GetPlayerlist()
+        public async Task<IImmutableList<PlayerInfo>> GetPlayerlist()
         {
-            return playerService.GetPlayerlist();
+            var playerService = await GetPlayerService();
+            return await playerService.GetPlayerlist();
         }
 
-        public Task Leave()
+        public async Task Leave()
         {
-            return playerService.Leave();
+            var playerService = await GetPlayerService();
+            await playerService.Leave();
         }
 
-        public Task<PlayerInfo> Register(PlayerInfo myInfo)
+        public async Task<PlayerInfo> Register(PlayerInfo myInfo)
         {
-            return playerService.Register(myInfo);
+            var playerService = await GetPlayerService();
+            return await playerService.Register(myInfo);
+        }
+
+        private async Task<IPlayerService> GetPlayerService()
+        {
+            return (await ScopeService.GetScope(Context)).GetRequiredService<IPlayerService>();
         }
     }
 }
