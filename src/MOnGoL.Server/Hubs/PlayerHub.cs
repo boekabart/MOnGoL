@@ -16,16 +16,25 @@ namespace MOnGoL.Backend.Controller.Hubs
         {
             private readonly IHubContext<PlayerHub> hubContext;
             private readonly IPlayersService playersService;
+            private readonly IBoardService boardService;
 
-            public Service(IHubContext<PlayerHub> hubContext, IPlayersService playersService)
+            public Service(IHubContext<PlayerHub> hubContext, IPlayersService playersService, IBoardService boardService)
             {
                 this.hubContext = hubContext;
                 this.playersService = playersService;
+                this.boardService = boardService;
                 playersService.OnPlayerlistChanged += OnPlayerlistChanged;
+                boardService.OnBoardChanged += OnBoardChanged;
+            }
+
+            private async void OnBoardChanged(object sender, ChangeSet changeSet)
+            {
+                await hubContext.Clients.All.SendAsync("BoardChanged", changeSet);
             }
 
             public void Dispose()
             {
+                boardService.OnBoardChanged -= OnBoardChanged;
                 playersService.OnPlayerlistChanged -= OnPlayerlistChanged;
             }
 
@@ -64,6 +73,23 @@ namespace MOnGoL.Backend.Controller.Hubs
         {
             var playerService = await GetPlayerService();
             return await playerService.Register(myInfo);
+        }
+
+        public async Task<bool> TryPlaceToken(Coordinate where)
+        {
+            var playerBoardService = await GetPlayerBoardService();
+            return await playerBoardService.TryPlaceToken(where);
+        }
+
+        public async Task<Board> GetBoard()
+        {
+            var playerBoardService = await GetPlayerBoardService();
+            return await playerBoardService.GetBoard();
+        }
+
+        private async Task<IPlayerBoardService> GetPlayerBoardService()
+        {
+            return (await ScopeService.GetScope(Context)).GetRequiredService<IPlayerBoardService>();
         }
 
         private async Task<IPlayerService> GetPlayerService()

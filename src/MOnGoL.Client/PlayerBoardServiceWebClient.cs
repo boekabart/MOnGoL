@@ -8,14 +8,10 @@ namespace MOnGoL.Backend.Client
 {
     public class PlayerBoardServiceWebClient : IPlayerBoardService
     {
-        public PlayerBoardServiceWebClient(NavigationManager client)
+        public PlayerBoardServiceWebClient(SignalRConnection signalR)
         {
-            var uri = client.ToAbsoluteUri("/api/hubs/playerBoard");
-            hubConnection = new HubConnectionBuilder()
-            .WithUrl(uri)
-            .Build();
-
-            hubConnection.On<ChangeSet>("BoardChanged", changes =>
+            SignalR = signalR;
+            HubConnection.On<ChangeSet>("BoardChanged", changes =>
             {
                 ApplyChanges(changes);
                 OnBoardChanged?.Invoke(this, changes);
@@ -28,9 +24,7 @@ namespace MOnGoL.Backend.Client
         }
 
         private EventHandler<ChangeSet> onBoardChanged;
-        private HubConnection hubConnection;
         private Board _theBoard;
-        private Task connectTask;
 
         public EventHandler<ChangeSet> OnBoardChanged
         {
@@ -45,7 +39,7 @@ namespace MOnGoL.Backend.Client
         public async Task<bool> TryPlaceToken(Coordinate where)
         {
             await Connect();
-            return await hubConnection.InvokeAsync<bool>("TryPlaceToken", where);
+            return await HubConnection.InvokeAsync<bool>("TryPlaceToken", where);
         }
 
         public async Task<Board> GetBoard()
@@ -53,25 +47,16 @@ namespace MOnGoL.Backend.Client
             if (_theBoard is not null)
                 return _theBoard;
             await Connect();
-            _theBoard = await hubConnection.InvokeAsync<Board>("GetBoard");
+            _theBoard = await HubConnection.InvokeAsync<Board>("GetBoard");
             //OnBoardChanged?.Invoke(this, new ChangeSet(ImmutableList<Change>.Empty));
             return _theBoard;
         }
 
-        private async Task Connect()
+        public SignalRConnection SignalR { get; }
+        private HubConnection HubConnection => SignalR.HubConnection;
+        private Task Connect()
         {
-            if (hubConnection.State == HubConnectionState.Connected)
-            {
-                return;
-            }
-            else if (hubConnection.State == HubConnectionState.Disconnected)
-            {
-                await (connectTask = hubConnection.StartAsync());
-            }
-            else if (connectTask is not null)
-            {
-                await connectTask;
-            }
+            return SignalR.Connect();
         }
     }
 }

@@ -29,7 +29,6 @@ namespace MOnGoL.Backend.Controller
 
             services.AddSingleton<SignalRScopeService>();
             services.AddSingleton<PlayerHub.Service>();
-            services.AddSingleton<PlayerBoardHub.Service>();
             return services;
         }
 
@@ -41,7 +40,6 @@ namespace MOnGoL.Backend.Controller
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<PlayerHub>("/hubs/player");
-                endpoints.MapHub<PlayerBoardHub>("/hubs/playerboard");
             });
         }
     }
