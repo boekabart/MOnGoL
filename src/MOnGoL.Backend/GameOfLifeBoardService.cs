@@ -1,6 +1,7 @@
 ﻿using MOnGoL.Common;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,11 +11,13 @@ namespace MOnGoL.Backend
     {
         private Board _theBoard;
         private SemaphoreSlim _lock = new SemaphoreSlim(1);
+        private readonly IPlayersService playersService;
 
-        public GameOfLifeBoardService()
+        public GameOfLifeBoardService(IPlayersService playersService)
         {
             _theBoard = Board.Create(21, 21);
             LifeStep();
+            this.playersService = playersService;
         }
 
         public EventHandler<ChangeSet> OnBoardChanged { get; set; }
@@ -84,8 +87,44 @@ namespace MOnGoL.Backend
         /// <param name="change">The change to apply; pre-valided</param>
         private void ApplyChanges(ChangeSet changes)
         {
+            if (!changes.Changes.Any())
+                return;
+
             _theBoard = _theBoard.WithChanges(changes);
             OnBoardChanged?.Invoke(this, changes);
+
+            Score();
         }
+
+        private void Score()
+        {
+            var (scoringChanges, scores) = FindFiveInARows(_theBoard);
+            if (scoringChanges.Changes.Any())
+            {
+                _theBoard = _theBoard.WithChanges(scoringChanges);
+                OnBoardChanged?.Invoke(this, scoringChanges);
+            }
+
+            foreach (var score in scores)
+                playersService.Score(score);
+        }
+
+        public static (ChangeSet, ImmutableList<Token> ScoringTokens) FindFiveInARows(Board board)
+        {
+            var Rows = board.Height;
+            var Columns = board.Width;
+
+            var minToScore = 5;
+
+            var hits = board.GetRowsAndColumns()
+                .SelectMany(rowOrColumn => rowOrColumn.Window((t1, t2) => t1.Token != t2.Token)
+               .Where(segment => segment[0].Token is not null)
+               .Where(segment => segment.Count >= minToScore));
+
+            var resets = hits.SelectMany(segment => segment).Select(pair => new Change(pair.Coordinate, null)).ToImmutableList();
+            var scores = hits.SelectMany(segment => segment.Skip(minToScore - 1).Select(pair => pair.Token)).ToImmutableList();
+            return (new ChangeSet(resets), scores);
+        }
+
     }
 }

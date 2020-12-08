@@ -38,7 +38,7 @@ namespace MOnGoL.Backend.Controller.Hubs
                 playersService.OnPlayerlistChanged -= OnPlayerlistChanged;
             }
 
-            private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerInfo> e)
+            private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerState> e)
             {
                 await hubContext.Clients.All.SendAsync("PlayerlistChanged", e);
             }
@@ -57,7 +57,7 @@ namespace MOnGoL.Backend.Controller.Hubs
             return await playerService.GetMyInfo();
         }
 
-        public async Task<IImmutableList<PlayerInfo>> GetPlayerlist()
+        public async Task<IImmutableList<PlayerState>> GetPlayerlist()
         {
             var playerService = await GetPlayerService();
             return await playerService.GetPlayerlist();

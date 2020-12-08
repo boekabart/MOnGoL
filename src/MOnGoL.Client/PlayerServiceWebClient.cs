@@ -12,17 +12,17 @@ namespace MOnGoL.Backend.Client
         public PlayerServiceWebClient(SignalRConnection signalR)
         {
             SignalR = signalR;
-            SignalR.HubConnection.On<IImmutableList<PlayerInfo>>("PlayerlistChanged", newValue =>
+            SignalR.HubConnection.On<IImmutableList<PlayerState>>("PlayerlistChanged", newValue =>
             {
                 lastPlayerlist = newValue;
                 OnPlayerlistChanged?.Invoke(this, newValue);
             });
         }
 
-        private EventHandler<IImmutableList<PlayerInfo>> onPlayerlistChanged;
-        private IImmutableList<PlayerInfo> lastPlayerlist;
+        private EventHandler<IImmutableList<PlayerState>> onPlayerlistChanged;
+        private IImmutableList<PlayerState> lastPlayerlist;
 
-        public EventHandler<IImmutableList<PlayerInfo>> OnPlayerlistChanged
+        public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged
         {
             get => onPlayerlistChanged;
             set
@@ -40,10 +40,10 @@ namespace MOnGoL.Backend.Client
             return await HubConnection.InvokeAsync<PlayerInfo?>("GetMyInfo");
         }
 
-        public async Task<IImmutableList<PlayerInfo>> GetPlayerlist()
+        public async Task<IImmutableList<PlayerState>> GetPlayerlist()
         {
             await SignalR.Connect();
-            return await HubConnection.InvokeAsync<IImmutableList<PlayerInfo>>("GetPlayerlist");
+            return await HubConnection.InvokeAsync<IImmutableList<PlayerState>>("GetPlayerlist");
         }
 
         public async Task Leave()

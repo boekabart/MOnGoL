@@ -16,7 +16,7 @@ namespace MOnGoL.Frontend.Shared
         [Inject] private IPlayerService PlayerService { get; set; }
         [Inject] private ILogger<PlayerList> Logger { get; set; }
 
-        private IImmutableList<PlayerInfo>? playerList = null;
+        private IImmutableList<PlayerState>? playerList = null;
 
         protected override async Task OnInitializedAsync()
         {
@@ -27,7 +27,7 @@ namespace MOnGoL.Frontend.Shared
             Logger.LogDebug("PlayerList retrieved with {0} entries", playerList.Count);
         }
 
-        private async void OnNewPlayerlist(object sender, IImmutableList<PlayerInfo> newValue)
+        private async void OnNewPlayerlist(object sender, IImmutableList<PlayerState> newValue)
         {
             playerList = newValue;
             await InvokeAsync(StateHasChanged);

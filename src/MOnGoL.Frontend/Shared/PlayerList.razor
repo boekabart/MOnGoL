@@ -2,14 +2,16 @@
     <tr>
         <th scope="col">Name</th>
         <th scope="col">Emoji</th>
+        <th scope="col">Score</th>
     </tr>
     @if (playerList is not null)
     {
         @foreach (var playerInfo in playerList)
         {
             <tr>
-                <td>@playerInfo.Name</td>
-                <td>@playerInfo.Token.Emoji</td>
+                <td>@playerInfo.PlayerInfo.Name</td>
+                <td>@playerInfo.PlayerInfo.Token.Emoji</td>
+                <td>@playerInfo.Score</td>
             </tr>
         }
     }

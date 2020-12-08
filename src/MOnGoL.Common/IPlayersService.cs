@@ -6,8 +6,9 @@ namespace MOnGoL.Common
 {
     public interface IPlayersService
     {
-        EventHandler<IImmutableList<PlayerInfo>> OnPlayerlistChanged { get; set; }
-        Task<IImmutableList<PlayerInfo>> GetPlayerlist();
+        EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set; }
+        Task<IImmutableList<PlayerState>> GetPlayerlist();
+        Task<bool> Score(Token playerToken);
         Task<PlayerInfo?> Register(PlayerInfo myInfo);
         Task Leave(PlayerInfo myInfo);
     }

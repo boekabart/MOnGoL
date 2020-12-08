@@ -17,12 +17,12 @@ namespace MOnGoL.Backend
             Logger.LogInformation("Created");
         }
 
-        private void OnGlobalPlayerlistChanged(object sender, IImmutableList<PlayerInfo> newPlayerlist)
+        private void OnGlobalPlayerlistChanged(object sender, IImmutableList<PlayerState> newPlayerlist)
         {
             OnPlayerlistChanged?.Invoke(this, newPlayerlist);
         }
 
-        public EventHandler<IImmutableList<PlayerInfo>> OnPlayerlistChanged { get; set;  }
+        public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set;  }
         private IPlayersService PlayersService { get; }
         private PlayerInfo? _myInfo;
 
@@ -31,7 +31,7 @@ namespace MOnGoL.Backend
             return Task.FromResult(_myInfo);
         }
 
-        public Task<IImmutableList<PlayerInfo>> GetPlayerlist()
+        public Task<IImmutableList<PlayerState>> GetPlayerlist()
         {
             return PlayersService.GetPlayerlist();
         }

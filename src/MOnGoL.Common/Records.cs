@@ -12,4 +12,5 @@ namespace MOnGoL.Common
         public static Board Create(int width, int height) => new Board(width, height, new Token[height * width]);
     }
     public record PlayerInfo(string Name, Token Token) {}
+    public record PlayerState(PlayerInfo PlayerInfo, int Score) { }
 }
