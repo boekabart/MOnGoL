@@ -27,6 +27,24 @@ namespace MOnGoL.Common
             => Enumerable.Range(0, aBoard.Width).Select(columnNumber => aBoard.GetColumn(columnNumber));
         public static IEnumerable<IEnumerable<(Coordinate Coordinate, Token? Token)>> GetRowsAndColumns(this Board aBoard)
             => aBoard.GetRows().Concat(aBoard.GetColumns());
+        public static IEnumerable<(Coordinate Coordinate, Token? Token)> GetSlash(this Board aBoard, int startColumnNumber)
+            => Enumerable.Range(0, aBoard.Height)
+            .Select(index => new Coordinate(index + startColumnNumber, aBoard.Height - (index + 1)))
+            .Where(coor => aBoard.IsValidCoordinate(coor))
+            .Select(coor => (coor, aBoard.TokenAt(coor)));
+        public static IEnumerable<IEnumerable<(Coordinate Coordinate, Token? Token)>> GetSlashes(this Board aBoard)
+            => Enumerable.Range(1 - aBoard.Height, aBoard.Width + aBoard.Height - 1)
+            .Select(startColumnNumber => aBoard.GetSlash(startColumnNumber));
+        public static IEnumerable<(Coordinate Coordinate, Token? Token)> GetBackslash(this Board aBoard, int startColumnNumber)
+            => Enumerable.Range(0, aBoard.Height)
+            .Select(index =>new Coordinate(index + startColumnNumber, index))
+            .Where(coor => aBoard.IsValidCoordinate(coor))
+            .Select(coor =>(coor, aBoard.TokenAt(coor)));
+        public static IEnumerable<IEnumerable<(Coordinate Coordinate, Token? Token)>> GetBackslashes(this Board aBoard)
+            => Enumerable.Range(1-aBoard.Height, aBoard.Width + aBoard.Height - 1)
+            .Select(startColumnNumber => aBoard.GetBackslash(startColumnNumber)); 
+        public static IEnumerable<IEnumerable<(Coordinate Coordinate, Token? Token)>> GetRowsColumnsAndDiagonals(this Board aBoard)
+            => aBoard.GetRowsAndColumns().Concat(aBoard.GetSlashes()).Concat(aBoard.GetBackslashes());
 
         public static IEnumerable<ArraySegment<T>> Window<T>(this IEnumerable<T> src, Func<T, T, bool> shouldStartNewWindow)
         {

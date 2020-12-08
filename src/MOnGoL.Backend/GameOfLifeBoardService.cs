@@ -116,7 +116,8 @@ namespace MOnGoL.Backend
 
             var minToScore = 5;
 
-            var hits = board.GetRowsAndColumns()
+            var hits = board
+                .GetRowsColumnsAndDiagonals()
                 .SelectMany(rowOrColumn => rowOrColumn.Window((t1, t2) => t1.Token != t2.Token)
                .Where(segment => segment[0].Token is not null)
                .Where(segment => segment.Count >= minToScore));
