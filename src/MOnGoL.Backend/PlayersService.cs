@@ -54,7 +54,7 @@ namespace MOnGoL.Backend
         public async Task<bool> Score(Token playerToken)
         {
             using var _ = await Lock();
-            var index = _playerlist.FindIndex(ps => ps.PlayerInfo.Token == playerToken);
+            var index = _playerlist.FindIndex(ps => ps.PlayerInfo.Token.Emoji.Equals(playerToken.Emoji));
             if (index < 0)
                 return false;
 
