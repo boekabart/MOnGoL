@@ -61,7 +61,6 @@ namespace MOnGoL.Backend.Client
         {
             await SignalR.Connect();
             await HubConnection.SendAsync("Leave");
-            await HubConnection.StopAsync();
         }
 
         public async Task<PlayerInfo?> Register(PlayerInfo myInfo)
