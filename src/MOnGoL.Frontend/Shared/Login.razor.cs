@@ -90,9 +90,12 @@ namespace MOnGoL.Frontend.Shared
         {
             var max = EmojiData.Emoji.All.Length;
             var steps = 50;
-            foreach (var delay in Enumerable.Range(0, steps).Select(i => TimeSpan.FromMilliseconds(2000.0 * Math.Pow(1.5,i) / Math.Pow(1.3, steps-1))))
+            var power = 1.5;
+            foreach (var delay in Enumerable.Range(0, steps).Select(i => TimeSpan.FromMilliseconds(2000.0 * Math.Pow(power,i) / Math.Pow(power, steps-1))))
             {
-                await Task.Delay(delay, disposalCts.Token);
+                await Task.Delay(delay);
+                if (disposalCts.IsCancellationRequested)
+                    break;
                 var emojiNo = new Random().Next(0, max);
                 var emoji = EmojiData.Emoji.All[emojiNo];
 
