@@ -6,14 +6,15 @@
             <tr>
             @foreach (var coor in row)
             {
-                var emo = @Coor(coor);
-                if (emo is null)
+                var token = @Coor(coor);
+                if (token is null)
                 {
                     <td class="p-0 text-center align-middle"><label class="btn btn-light" @onclick="@(e => Put(coor))">&nbsp;</label></td>
                 }
                 else
                 {
-                    <td class ="p-0 text-center align-middle">@emo</td>
+                    var bg = token.Scored ? "bg-warning" : "";
+                    <td class ="p-0 text-center align-middle @bg">@token.Emoji</td>
                 }
             }
             </tr>

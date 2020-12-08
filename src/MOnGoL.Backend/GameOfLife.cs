@@ -28,7 +28,7 @@ namespace MOnGoL.Backend
                     {
                         var coor = new Coordinate(row, column);
                         // find your alive neighbors
-                        var aliveNeighbors = new List<Token>();
+                        var aliveNeighbors = new List<PlacedToken>();
                         for (var i = -1; i <= 1; i++)
                         {
                             for (var j = -1; j <= 1; j++)
@@ -43,6 +43,9 @@ namespace MOnGoL.Backend
                         }
 
                         var currentCell = currentGrid.TokenAt(coor);
+
+                        if (currentCell.IsLocked())
+                            continue;
 
                         // Implementing the Rules of Life 
 
@@ -61,14 +64,17 @@ namespace MOnGoL.Backend
                         // A new cell is born 
                         else if (currentCell.IsDead() && aliveNeighbors.Count == 3)
                         {
-                            yield return new Change(coor, aliveNeighbors[RandomNumberGenerator.GetInt32(0, 3)]);
+                            yield return new Change(coor, aliveNeighbors[RandomNumberGenerator.GetInt32(0, 3)].Unlocked());
                         }
                     }
                 }
             }
         }
-        private static Token Dead => null;
-        private static bool IsDead(this Token token) => token is null;
-        private static bool IsAlive(this Token token) => token is not null;
+        private static PlacedToken Dead => null;
+        private static PlacedToken Unlocked(this PlacedToken token) => token.IsLocked() ? new PlacedToken(token.Emoji, false) : token;
+        private static bool IsDead(this PlacedToken token) => token is null;
+        private static bool IsAlive(this PlacedToken token) => token is not null && !token.IsLocked();
+        private static bool IsLocked(this PlacedToken token) => token is not null && token.Scored;
+
     }
 }

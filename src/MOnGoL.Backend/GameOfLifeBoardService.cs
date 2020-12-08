@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,7 +38,7 @@ namespace MOnGoL.Backend
 
         private async void LifeStep()
         {
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await Task.Delay(TimeSpan.FromSeconds(2));
             using var _ = await _lock.DisposableEnter();
             var changes = GameOfLife.NextGenerationChanges(_theBoard);
             ApplyChanges(changes);
@@ -60,7 +61,7 @@ namespace MOnGoL.Backend
                     return false; // Occupado
                 }
 
-                var change = new Change(where, token);
+                var change = new Change(where, new PlacedToken(token.Emoji, false));
                 ApplyChange(change);
 
                 return true;
@@ -103,13 +104,22 @@ namespace MOnGoL.Backend
             {
                 _theBoard = _theBoard.WithChanges(scoringChanges);
                 OnBoardChanged?.Invoke(this, scoringChanges);
+                ScheduleClearScore(scoringChanges);
             }
 
             foreach (var score in scores)
                 playersService.Score(score);
         }
 
-        public static (ChangeSet, ImmutableList<Token> ScoringTokens) FindFiveInARows(Board board)
+        private async void ScheduleClearScore(ChangeSet changes)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(0.5));
+            var resetChanges = new ChangeSet(changes.Changes.Select(change => new Change(change.Coordinate, null)).ToImmutableList());
+            using var _ = await _lock.DisposableEnter();
+            ApplyChanges(resetChanges);
+        }
+
+        public static (ChangeSet, ImmutableList<PlacedToken> ScoringTokens) FindFiveInARows(Board board)
         {
             var Rows = board.Height;
             var Columns = board.Width;
@@ -120,12 +130,15 @@ namespace MOnGoL.Backend
                 .GetRowsColumnsAndDiagonals()
                 .SelectMany(rowOrColumn => rowOrColumn.Window((t1, t2) => t1.Token != t2.Token)
                .Where(segment => segment[0].Token is not null)
+               .Where(segment => !IsScoreToken(segment[0].Token))
                .Where(segment => segment.Count >= minToScore));
 
-            var resets = hits.SelectMany(segment => segment).Select(pair => new Change(pair.Coordinate, null)).ToImmutableList();
+            var resets = hits.SelectMany(segment => segment).Select(pair => new Change(pair.Coordinate, ScoreToken(pair.Token))).ToImmutableList();
             var scores = hits.SelectMany(segment => segment.Skip(minToScore - 1).Select(pair => pair.Token)).ToImmutableList();
             return (new ChangeSet(resets), scores);
         }
 
+        private static PlacedToken ScoreToken(PlacedToken src) => new PlacedToken(src.Emoji, true);
+        private static bool IsScoreToken(PlacedToken token) => token.Scored;
     }
 }

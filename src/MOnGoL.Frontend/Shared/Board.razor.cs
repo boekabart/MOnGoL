@@ -24,7 +24,7 @@ namespace MOnGoL.Frontend.Shared
         private IEnumerable<IEnumerable<Coordinate>> Rows
             => Enumerable.Range(0, board.Height).Select(y => Enumerable.Range(0, board.Width).Select(x => new Coordinate(x, y)));
 
-        private string? Coor(Coordinate coordinate) => board?.TokenAt(coordinate)?.Emoji ?? null;
+        private PlacedToken? Coor(Coordinate coordinate) => board?.TokenAt(coordinate);
 
         protected override async Task OnInitializedAsync()
         {
