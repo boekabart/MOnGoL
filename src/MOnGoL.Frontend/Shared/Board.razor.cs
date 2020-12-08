@@ -18,9 +18,6 @@ namespace MOnGoL.Frontend.Shared
 
         private Common.Board? board;
 
-        private int Height => board?.Height ?? 20;
-        private int Width => board?.Width ?? 20;
-
         private IEnumerable<IEnumerable<Coordinate>> Rows
             => Enumerable.Range(0, board.Height).Select(y => Enumerable.Range(0, board.Width).Select(x => new Coordinate(x, y)));
 
@@ -48,5 +45,7 @@ namespace MOnGoL.Frontend.Shared
         {
             BoardService.OnBoardChanged -= OnBoardChanged;
         }
+
+        public static string DummyEmoji { get; } = "╳\uFE0F";
     }
 }

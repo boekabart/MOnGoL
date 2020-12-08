@@ -70,7 +70,7 @@ namespace MOnGoL.Frontend.Shared
             }
         }
 
-        private bool CanRegister => !string.IsNullOrEmpty(Name) && Emoji is not null;
+        private bool CanRegister => !string.IsNullOrEmpty(Name) && Emoji is not null && Emoji != Board.DummyEmoji;
         private bool CanRandom => RandomTask is null;
         private Task RandomTask { get; set; }
 
