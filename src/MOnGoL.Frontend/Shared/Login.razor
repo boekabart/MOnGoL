@@ -1,14 +1,22 @@
-﻿<div class="row">
-    @if (MyInfo is null)
-    {
-        <input @bind="Name" @bind:event="oninput" />
-        <button class="btn btn-secondary" @onclick="RandomEmoji">Random</button>
-        <input @bind="EmojiText" @bind:event="oninput" />
-        <span>@Emoji</span>
-        <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
-    }
-    else
-    {
-        <button class="btn btn-primary" @onclick="Leave">Log off</button>
-    }
-</div>
+﻿@if (MyInfo is null)
+{
+    <div>
+        <div class="form-group">
+            <input @bind="Name" @bind:event="oninput" />
+        </div>
+        <div class="form-group">
+            <input @bind="EmojiText" @bind:event="oninput" />
+        </div>
+        <div class="form-group">
+            <button class="btn btn-secondary" @onclick="RandomEmoji" disabled="@(!CanRandom)">Random</button>
+            <span>@Emoji</span>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
+        </div>
+    </div>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="Leave">Log off @MyInfo.Token.Emoji</button>
+}

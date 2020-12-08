@@ -22,7 +22,8 @@ namespace MOnGoL.Backend
             OnPlayerlistChanged?.Invoke(this, newPlayerlist);
         }
 
-        public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set;  }
+        public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set; }
+        public EventHandler<PlayerInfo?> OnMyInfoChanged { get; set;  }
         private IPlayersService PlayersService { get; }
         private PlayerInfo? _myInfo;
 
@@ -40,8 +41,11 @@ namespace MOnGoL.Backend
         {
             Logger.LogInformation("Leave()");
             if (_myInfo is not null)
+            {
                 await PlayersService.Leave(_myInfo);
-            _myInfo = null;
+                _myInfo = null;
+                OnMyInfoChanged?.Invoke(this, _myInfo);
+            }
         }
 
         public async Task<PlayerInfo> Register(PlayerInfo myInfo)
@@ -50,7 +54,10 @@ namespace MOnGoL.Backend
             if (_myInfo is not null)
                 return _myInfo;
             Logger.LogInformation("Registering with PS");
-            return _myInfo = await PlayersService.Register(myInfo);
+            _myInfo = await PlayersService.Register(myInfo);
+            if (_myInfo is not null)
+                OnMyInfoChanged?.Invoke(this, _myInfo);
+            return _myInfo;
         }
 
         public async ValueTask DisposeAsync()

@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MOnGoL.Frontend.Shared
 {
-    public partial class Login
+    public partial class Login : IDisposable
     {
         [Inject] private IPlayerService PlayerService { get; set; }
         [Inject] private ILocalStorageService LocalStorage { get; set; }
@@ -23,19 +24,25 @@ namespace MOnGoL.Frontend.Shared
         private string EmojiText = String.Empty;
         private PlayerInfo? MyInfo { get; set; }
 
-        private HashSet<string> Emojis;
+        private HashSet<string> Emojis = new HashSet<string>(EmojiData.Emoji.All.Select(emo => emo.ToString()));
 
         public Login()
         {
-            Emojis = new HashSet<string>(EmojiData.Emoji.All.Select(emo => emo.ToString()));
         }
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             Logger.LogDebug("Reading my info from PlayerService");
+            PlayerService.OnMyInfoChanged += OnMyInfoChanged;
             MyInfo = await PlayerService.GetMyInfo();
             Logger.LogDebug("Got this: '{0}'", MyInfo);
+        }
+
+        private async void OnMyInfoChanged(object sender, PlayerInfo? e)
+        {
+            MyInfo = e;
+            await InvokeAsync(StateHasChanged);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -64,20 +71,33 @@ namespace MOnGoL.Frontend.Shared
         }
 
         private bool CanRegister => !string.IsNullOrEmpty(Name) && Emoji is not null;
+        private bool CanRandom => RandomTask is null;
+        private Task RandomTask { get; set; }
 
-        private async Task RandomEmoji()
+        private CancellationTokenSource disposalCts = new CancellationTokenSource();
+
+        private async void RandomEmoji()
+        {
+            RandomTask = SpinTheWheel();
+            await RandomTask;
+            RandomTask = null;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        private async Task SpinTheWheel()
         {
             var max = EmojiData.Emoji.All.Length;
-            foreach (var delay in Enumerable.Range(0, 50).Select(i => TimeSpan.FromMilliseconds(i * i * i / 125)))
+            foreach (var delay in Enumerable.Range(1, 50).Select(i => TimeSpan.FromMilliseconds(i * i * i / 125)))
             {
+                await Task.Delay(delay, disposalCts.Token);
                 var emojiNo = new Random().Next(0, max);
                 EmojiText = EmojiData.Emoji.All[emojiNo].ToString();
-                StateHasChanged();
-                await Task.Delay(delay);
+                await InvokeAsync(StateHasChanged);
                 if (MyInfo is not null)
                     break;
             }
         }
+
         private async Task Leave()
         {
             if (MyInfo is not null)
@@ -108,6 +128,12 @@ namespace MOnGoL.Frontend.Shared
             }
             else
                 Logger.LogDebug("Server refused, apparently that would be a conflict with an already registered player");
+        }
+
+        public void Dispose()
+        {
+            disposalCts.Cancel();
+            PlayerService.OnMyInfoChanged -= OnMyInfoChanged;
         }
     }
 }

@@ -7,18 +7,17 @@ using System.Threading.Tasks;
 
 namespace MOnGoL.Backend.Controller.Hubs
 {
-
     public class PlayerHub : Hub
     {
-        public Service HubService { get; }
+        public SingletonService HubService { get; }
 
-        public class Service : IDisposable
+        public class SingletonService : IDisposable
         {
             private readonly IHubContext<PlayerHub> hubContext;
             private readonly IPlayersService playersService;
             private readonly IBoardService boardService;
 
-            public Service(IHubContext<PlayerHub> hubContext, IPlayersService playersService, IBoardService boardService)
+            public SingletonService(IHubContext<PlayerHub> hubContext, IPlayersService playersService, IBoardService boardService)
             {
                 this.hubContext = hubContext;
                 this.playersService = playersService;
@@ -44,9 +43,48 @@ namespace MOnGoL.Backend.Controller.Hubs
             }
         }
 
+        public class PlayerService : IDisposable
+        {
+            private readonly IHubContext<PlayerHub> hubContext;
+            private readonly IPlayerService playerService;
+            private readonly IPlayerBoardService playerBoardService;
+
+            public PlayerService(IHubContext<PlayerHub> hubContext, IPlayerService playerService, IPlayerBoardService playerBoardService)
+            {
+                this.hubContext = hubContext;
+                this.playerService = playerService;
+                this.playerBoardService = playerBoardService;
+                playerService.OnPlayerlistChanged += OnPlayerlistChanged;
+                playerService.OnMyInfoChanged += OnMyInfoChanged;
+                playerBoardService.OnBoardChanged += OnBoardChanged;
+            }
+
+            private async void OnBoardChanged(object sender, ChangeSet changeSet)
+            {
+                await hubContext.Clients.All.SendAsync("BoardChanged", changeSet);
+            }
+
+            public void Dispose()
+            {
+                playerBoardService.OnBoardChanged -= OnBoardChanged;
+                playerService.OnMyInfoChanged -= OnMyInfoChanged;
+                playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
+            }
+
+            private async void OnMyInfoChanged(object sender, PlayerInfo? e)
+            {
+                await hubContext.Clients.All.SendAsync("OnMyInfoChanged", e);
+            }
+
+            private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerState> e)
+            {
+                await hubContext.Clients.All.SendAsync("PlayerlistChanged", e);
+            }
+        }
+
         public SignalRScopeService ScopeService { get; }
 
-        public PlayerHub(SignalRScopeService scopeService, Service _)
+        public PlayerHub(SignalRScopeService scopeService)
         {
             ScopeService = scopeService;
         }
@@ -89,12 +127,19 @@ namespace MOnGoL.Backend.Controller.Hubs
 
         private async Task<IPlayerBoardService> GetPlayerBoardService()
         {
-            return (await ScopeService.GetScope(Context)).GetRequiredService<IPlayerBoardService>();
+            return (await GetScope()).GetRequiredService<IPlayerBoardService>();
         }
 
         private async Task<IPlayerService> GetPlayerService()
         {
-            return (await ScopeService.GetScope(Context)).GetRequiredService<IPlayerService>();
+            return (await GetScope()).GetRequiredService<IPlayerService>();
+        }
+
+        private async Task<IServiceProvider> GetScope()
+        {
+            var serviceProvider = await ScopeService.GetScope(Context);
+            var _ = serviceProvider.GetRequiredService<PlayerService>();
+            return serviceProvider;
         }
     }
 }

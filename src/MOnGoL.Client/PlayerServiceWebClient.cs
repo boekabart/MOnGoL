@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace MOnGoL.Backend.Client
 {
-
     public class PlayerServiceWebClient : IPlayerService
     {
         public PlayerServiceWebClient(SignalRConnection signalR)
@@ -14,13 +13,15 @@ namespace MOnGoL.Backend.Client
             SignalR = signalR;
             SignalR.HubConnection.On<IImmutableList<PlayerState>>("PlayerlistChanged", newValue =>
             {
-                lastPlayerlist = newValue;
                 OnPlayerlistChanged?.Invoke(this, newValue);
+            });
+            SignalR.HubConnection.On<PlayerInfo?>("OnMyInfoChanged", newValue =>
+            {
+                OnMyInfoChanged?.Invoke(this, newValue);
             });
         }
 
         private EventHandler<IImmutableList<PlayerState>> onPlayerlistChanged;
-        private IImmutableList<PlayerState> lastPlayerlist;
 
         public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged
         {
@@ -29,8 +30,18 @@ namespace MOnGoL.Backend.Client
             {
                 onPlayerlistChanged = value;
                 _ = SignalR.Connect();
-                if (lastPlayerlist is not null)
-                    onPlayerlistChanged?.Invoke(this, lastPlayerlist);
+            }
+        }
+
+        private EventHandler<PlayerInfo?> onMyInfoChanged;
+
+        public EventHandler<PlayerInfo?> OnMyInfoChanged
+        {
+            get => onMyInfoChanged;
+            set
+            {
+                onMyInfoChanged = value;
+                _ = SignalR.Connect();
             }
         }
 
