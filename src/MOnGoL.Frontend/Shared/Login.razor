@@ -2,17 +2,16 @@
 {
     <div>
         <div class="form-group">
+            <span>Name:</span>
             <input @bind="Name" @bind:event="oninput" />
         </div>
         <div class="form-group">
+            <span>Emoji (name or copy/paste):</span>
             <input @bind="EmojiText" @bind:event="oninput" />
+            <button class="btn btn-secondary" @onclick="RandomEmoji" disabled="@(!CanRandom)">🔀</button>
         </div>
         <div class="form-group">
-            <button class="btn btn-secondary" @onclick="RandomEmoji" disabled="@(!CanRandom)">Random</button>
-            <span>@Emoji</span>
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim your Emoji</button>
+            <button class="btn btn-primary" @onclick="Register" disabled="@(!CanRegister)">Claim @Emoji</button>
         </div>
     </div>
 }

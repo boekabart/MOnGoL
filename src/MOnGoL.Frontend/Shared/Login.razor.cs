@@ -80,6 +80,8 @@ namespace MOnGoL.Frontend.Shared
         {
             RandomTask = SpinTheWheel();
             await RandomTask;
+            if (disposalCts.IsCancellationRequested)
+                return;
             RandomTask = null;
             await InvokeAsync(StateHasChanged);
         }
@@ -87,11 +89,16 @@ namespace MOnGoL.Frontend.Shared
         private async Task SpinTheWheel()
         {
             var max = EmojiData.Emoji.All.Length;
-            foreach (var delay in Enumerable.Range(1, 50).Select(i => TimeSpan.FromMilliseconds(i * i * i / 125)))
+            var steps = 50;
+            foreach (var delay in Enumerable.Range(0, steps).Select(i => TimeSpan.FromMilliseconds(2000.0 * Math.Pow(1.5,i) / Math.Pow(1.3, steps-1))))
             {
                 await Task.Delay(delay, disposalCts.Token);
                 var emojiNo = new Random().Next(0, max);
-                EmojiText = EmojiData.Emoji.All[emojiNo].ToString();
+                var emoji = EmojiData.Emoji.All[emojiNo];
+
+                EmojiText = string.IsNullOrEmpty(emoji.Shortcode)
+                    ? emoji.ToString()
+                    : emoji.Shortcode;
                 await InvokeAsync(StateHasChanged);
                 if (MyInfo is not null)
                     break;

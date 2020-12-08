@@ -1,4 +1,4 @@
-﻿<table class="table">
+﻿<table class="table table-sm">
     <tr>
         <th scope="col">Name</th>
         <th scope="col">Emoji</th>
@@ -6,12 +6,13 @@
     </tr>
     @if (playerList is not null)
     {
-        @foreach (var playerInfo in playerList)
+        @foreach (var playerState in playerList)
         {
-            <tr>
-                <td>@playerInfo.PlayerInfo.Name</td>
-                <td>@playerInfo.PlayerInfo.Token.Emoji</td>
-                <td>@playerInfo.Score</td>
+            var clas = IsMe(playerState.PlayerInfo) ? "font-weight-bold table-active" : "";
+            <tr class="@clas">
+                <td>@playerState.PlayerInfo.Name</td>
+                <td>@playerState.PlayerInfo.Token.Emoji</td>
+                <td>@playerState.Score</td>
             </tr>
         }
     }
