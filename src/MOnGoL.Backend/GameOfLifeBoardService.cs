@@ -14,6 +14,7 @@ namespace MOnGoL.Backend
         public GameOfLifeBoardService()
         {
             _theBoard = Board.Create(21, 21);
+            LifeStep();
         }
 
         public EventHandler<ChangeSet> OnBoardChanged { get; set; }
@@ -29,6 +30,15 @@ namespace MOnGoL.Backend
             {
                 _lock.Release();
             }
+        }
+
+        private async void LifeStep()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            using var _ = await _lock.DisposableEnter();
+            var changes = GameOfLife.NextGenerationChanges(_theBoard);
+            ApplyChanges(changes);
+            LifeStep();
         }
 
         public async Task<bool> TryPlaceToken(Coordinate where, Token token)
