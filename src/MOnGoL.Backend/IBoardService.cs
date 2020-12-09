@@ -1,7 +1,8 @@
-﻿using System;
+﻿using MOnGoL.Common;
+using System;
 using System.Threading.Tasks;
 
-namespace MOnGoL.Common
+namespace MOnGoL.Backend
 {
     public interface IBoardService
     {

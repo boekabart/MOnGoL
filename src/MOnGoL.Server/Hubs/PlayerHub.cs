@@ -9,47 +9,13 @@ namespace MOnGoL.Backend.Controller.Hubs
 {
     public class PlayerHub : Hub
     {
-        public SingletonService HubService { get; }
-
-        public class SingletonService : IDisposable
-        {
-            private readonly IHubContext<PlayerHub> hubContext;
-            private readonly IPlayersService playersService;
-            private readonly IBoardService boardService;
-
-            public SingletonService(IHubContext<PlayerHub> hubContext, IPlayersService playersService, IBoardService boardService)
-            {
-                this.hubContext = hubContext;
-                this.playersService = playersService;
-                this.boardService = boardService;
-                playersService.OnPlayerlistChanged += OnPlayerlistChanged;
-                boardService.OnBoardChanged += OnBoardChanged;
-            }
-
-            private async void OnBoardChanged(object sender, ChangeSet changeSet)
-            {
-                await hubContext.Clients.All.SendAsync("BoardChanged", changeSet);
-            }
-
-            public void Dispose()
-            {
-                boardService.OnBoardChanged -= OnBoardChanged;
-                playersService.OnPlayerlistChanged -= OnPlayerlistChanged;
-            }
-
-            private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerState> e)
-            {
-                await hubContext.Clients.All.SendAsync("PlayerlistChanged", e);
-            }
-        }
-
-        public class PlayerService : IDisposable
+        public class BroadcastService : IDisposable
         {
             private readonly IHubContext<PlayerHub> hubContext;
             private readonly IPlayerService playerService;
             private readonly IPlayerBoardService playerBoardService;
 
-            public PlayerService(IHubContext<PlayerHub> hubContext, IPlayerService playerService, IPlayerBoardService playerBoardService)
+            public BroadcastService(IHubContext<PlayerHub> hubContext, IPlayerService playerService, IPlayerBoardService playerBoardService)
             {
                 this.hubContext = hubContext;
                 this.playerService = playerService;
@@ -138,7 +104,7 @@ namespace MOnGoL.Backend.Controller.Hubs
         private async Task<IServiceProvider> GetScope()
         {
             var serviceProvider = await ScopeService.GetScope(Context);
-            var _ = serviceProvider.GetRequiredService<PlayerService>();
+            var _ = serviceProvider.GetRequiredService<BroadcastService>();
             return serviceProvider;
         }
     }
