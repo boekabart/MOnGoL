@@ -154,12 +154,16 @@ namespace MOnGoL.Backend
 
             var success = await BoardService.TryPlaceToken(where, _myInfo.Token);
             if (!success)
+            {
                 await AddTokenToStock();
+            }
             else
+            {
                 ScheduleAddingTokenToStock();
+                await PlayersService.Score(_myInfo.Token, -1);
+            }
             return success;
         }
         #endregion
     }
 }
-

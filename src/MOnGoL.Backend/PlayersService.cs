@@ -51,14 +51,17 @@ namespace MOnGoL.Backend
             return myInfo;
         }
 
-        public async Task<bool> Score(Token playerToken)
+        public async Task<bool> Score(Token playerToken, int delta)
         {
+            if (delta == 0)
+                return true;
+
             using var _ = await Lock();
             var index = _playerlist.FindIndex(ps => ps.PlayerInfo.Token.Emoji.Equals(playerToken.Emoji));
             if (index < 0)
                 return false;
 
-            var newPlayerState = _playerlist[index] with { Score = _playerlist[index].Score + 1 };
+            var newPlayerState = _playerlist[index] with { Score = _playerlist[index].Score + delta };
             _playerlist = _playerlist.SetItem(index, newPlayerState);
             OnPlayerlistChanged?.Invoke(this, _playerlist);
             return true;

@@ -9,7 +9,7 @@ namespace MOnGoL.Backend
     {
         EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set; }
         Task<IImmutableList<PlayerState>> GetPlayerlist();
-        Task<bool> Score(Token playerToken);
+        Task<bool> Score(Token playerToken, int delta);
         Task<PlayerInfo> Register(PlayerInfo myInfo);
         Task Leave(PlayerInfo myInfo);
     }

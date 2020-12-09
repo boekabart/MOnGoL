@@ -108,7 +108,7 @@ namespace MOnGoL.Backend
             }
 
             foreach (var score in scores)
-                playersService.Score(score);
+                playersService.Score(score, 2);
         }
 
         private async void ScheduleClearScore(ChangeSet changes)
