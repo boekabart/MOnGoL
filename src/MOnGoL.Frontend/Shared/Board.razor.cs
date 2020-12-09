@@ -13,7 +13,7 @@ namespace MOnGoL.Frontend.Shared
 {
     public partial class Board : IDisposable
     {
-        [Inject] private IPlayerBoardService BoardService { get; set; }
+        [Inject] private IPlayerService PlayerService { get; set; }
         [Inject] private ILogger<PlayerList> Logger { get; set; }
 
         private Common.Board? board;
@@ -26,13 +26,15 @@ namespace MOnGoL.Frontend.Shared
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            BoardService.OnBoardChanged += OnBoardChanged;
-            board = await BoardService.GetBoard();
+            PlayerService.OnBoardChanged += OnBoardChanged;
+            PlayerService.OnTokenStockChanged += OnTokenStockChanged;
+            board = await PlayerService.GetBoard();
+            await SetTokenStock(await PlayerService.GetTokenStock());
         }
 
         private async Task Put(Coordinate coor)
         {
-            var success = await BoardService.TryPlaceToken(coor);
+            var success = await PlayerService.TryPlaceToken(coor);
         }
 
         private async void OnBoardChanged(object sender, ChangeSet changes)
@@ -41,11 +43,27 @@ namespace MOnGoL.Frontend.Shared
             await InvokeAsync(StateHasChanged);
         }
 
+        private async void OnTokenStockChanged(object sender, int newStockValue)
+        {
+            await SetTokenStock(newStockValue);
+        }
+
+        private async Task SetTokenStock(int newStockValue)
+        {
+            var myInfo = await PlayerService.GetMyInfo();
+            TokenStock = myInfo is null
+                ? Array.Empty<string>()
+                : Enumerable.Repeat(myInfo.Token.Emoji, newStockValue).ToArray();
+            await InvokeAsync(StateHasChanged);
+        }
+
         public void Dispose()
         {
-            BoardService.OnBoardChanged -= OnBoardChanged;
+            PlayerService.OnBoardChanged -= OnBoardChanged;
+            PlayerService.OnTokenStockChanged -= OnTokenStockChanged;
         }
 
         public static string DummyEmoji { get; } = "╳\uFE0F";
+        public string[] TokenStock { get; private set; } = Array.Empty<string>();
     }
 }

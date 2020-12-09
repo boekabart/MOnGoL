@@ -23,7 +23,6 @@ namespace MOnGoL.WebAssembly
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = apiUri });
             builder.Services.AddScoped<Backend.Client.SignalRConnection>();
             builder.Services.AddScoped<Common.IPlayerService, Backend.Client.PlayerServiceWebClient>();
-            builder.Services.AddScoped<Common.IPlayerBoardService, Backend.Client.PlayerBoardServiceWebClient>();
 
             await builder.Build().RunAsync();
         }

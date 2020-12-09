@@ -1,4 +1,11 @@
 ﻿<div>
+    <div>
+        <span>Inventory:</span>
+        @foreach( var token in TokenStock)
+        {
+            <span>@token</span>
+        }
+    </div>
     <table class="table table-bordered">
         @if (board is not null)
         {

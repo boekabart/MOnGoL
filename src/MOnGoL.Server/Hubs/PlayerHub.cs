@@ -13,16 +13,23 @@ namespace MOnGoL.Backend.Controller.Hubs
         {
             private readonly IHubContext<PlayerHub> hubContext;
             private readonly IPlayerService playerService;
-            private readonly IPlayerBoardService playerBoardService;
 
-            public BroadcastService(IHubContext<PlayerHub> hubContext, IPlayerService playerService, IPlayerBoardService playerBoardService)
+            public BroadcastService(IHubContext<PlayerHub> hubContext, IPlayerService playerService)
             {
                 this.hubContext = hubContext;
                 this.playerService = playerService;
-                this.playerBoardService = playerBoardService;
                 playerService.OnPlayerlistChanged += OnPlayerlistChanged;
                 playerService.OnMyInfoChanged += OnMyInfoChanged;
-                playerBoardService.OnBoardChanged += OnBoardChanged;
+                playerService.OnBoardChanged += OnBoardChanged;
+                playerService.OnTokenStockChanged += OnTokenStockChanged;
+            }
+
+            public void Dispose()
+            {
+                playerService.OnTokenStockChanged -= OnTokenStockChanged;
+                playerService.OnBoardChanged -= OnBoardChanged;
+                playerService.OnMyInfoChanged -= OnMyInfoChanged;
+                playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
             }
 
             private async void OnBoardChanged(object sender, ChangeSet changeSet)
@@ -30,11 +37,9 @@ namespace MOnGoL.Backend.Controller.Hubs
                 await hubContext.Clients.All.SendAsync("BoardChanged", changeSet);
             }
 
-            public void Dispose()
+            private async void OnTokenStockChanged(object sender, int newStockValue)
             {
-                playerBoardService.OnBoardChanged -= OnBoardChanged;
-                playerService.OnMyInfoChanged -= OnMyInfoChanged;
-                playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
+                await hubContext.Clients.All.SendAsync("OnTokenStockChanged", newStockValue);
             }
 
             private async void OnMyInfoChanged(object sender, PlayerInfo? e)
@@ -81,19 +86,20 @@ namespace MOnGoL.Backend.Controller.Hubs
 
         public async Task<bool> TryPlaceToken(Coordinate where)
         {
-            var playerBoardService = await GetPlayerBoardService();
-            return await playerBoardService.TryPlaceToken(where);
+            var playerService = await GetPlayerService();
+            return await playerService.TryPlaceToken(where);
         }
 
         public async Task<Board> GetBoard()
         {
-            var playerBoardService = await GetPlayerBoardService();
-            return await playerBoardService.GetBoard();
+            var playerService = await GetPlayerService();
+            return await playerService.GetBoard();
         }
 
-        private async Task<IPlayerBoardService> GetPlayerBoardService()
+        public async Task<int> GetTokenStock()
         {
-            return (await GetScope()).GetRequiredService<IPlayerBoardService>();
+            var playerService = await GetPlayerService();
+            return await playerService.GetTokenStock();
         }
 
         private async Task<IPlayerService> GetPlayerService()

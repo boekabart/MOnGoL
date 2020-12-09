@@ -19,6 +19,59 @@ namespace MOnGoL.Backend.Client
             {
                 OnMyInfoChanged?.Invoke(this, newValue);
             });
+            SignalR.HubConnection.On<int>("OnTokenStockChanged", newValue =>
+            {
+                OnTokenStockChanged?.Invoke(this, newValue);
+            });
+            HubConnection.On<ChangeSet>("BoardChanged", changes =>
+            {
+                ApplyChanges(changes);
+                OnBoardChanged?.Invoke(this, changes);
+            });
+        }
+
+        private void ApplyChanges(ChangeSet changes)
+        {
+            _theBoard = _theBoard?.WithChanges(changes);
+        }
+
+        private Board _theBoard;
+
+        private EventHandler<int> onTokenStockChanged;
+        public EventHandler<int> OnTokenStockChanged
+        {
+            get => onTokenStockChanged;
+            set
+            {
+                onTokenStockChanged = value;
+                _ = Connect();
+            }
+        }
+
+        private EventHandler<ChangeSet> onBoardChanged;
+        public EventHandler<ChangeSet> OnBoardChanged
+        {
+            get => onBoardChanged;
+            set
+            {
+                onBoardChanged = value;
+                _ = Connect();
+            }
+        }
+
+        public async Task<bool> TryPlaceToken(Coordinate where)
+        {
+            await Connect();
+            return await HubConnection.InvokeAsync<bool>("TryPlaceToken", where);
+        }
+
+        public async Task<Board> GetBoard()
+        {
+            if (_theBoard is not null)
+                return _theBoard;
+            await Connect();
+            _theBoard = await HubConnection.InvokeAsync<Board>("GetBoard");
+            return _theBoard;
         }
 
         private EventHandler<IImmutableList<PlayerState>> onPlayerlistChanged;
@@ -60,7 +113,7 @@ namespace MOnGoL.Backend.Client
         public async Task Leave()
         {
             await SignalR.Connect();
-            await HubConnection.SendAsync("Leave");
+            await HubConnection.InvokeAsync("Leave");
         }
 
         public async Task<PlayerInfo?> Register(PlayerInfo myInfo)
@@ -74,6 +127,12 @@ namespace MOnGoL.Backend.Client
         private Task Connect()
         {
             return SignalR.Connect();
+        }
+
+        public async Task<int> GetTokenStock()
+        {
+            await Connect();
+            return await HubConnection.InvokeAsync<int>("GetTokenStock");
         }
     }
 }

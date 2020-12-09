@@ -10,7 +10,6 @@ namespace MOnGoL.Backend
             services.AddSingleton<IPlayersService, PlayersService>();
             services.AddSingleton<IBoardService, GameOfLifeBoardService>();
             services.AddScoped<IPlayerService, PlayerService>();
-            services.AddScoped<IPlayerBoardService, PlayerBoardService>();
         }
     }
 }
