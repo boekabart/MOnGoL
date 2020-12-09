@@ -1,28 +1,12 @@
 ﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:62963",
-      "sslPort": 0
-    }
-  },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "api/weatherforecast?startDate=2021-01-01T12:34:56Z",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "MOnGoL.ApiHost": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "api/weatherforecast?startDate=2021-01-01T12:34:56Z",
-      "applicationUrl": "http://localhost:5000",
+      "applicationUrl": "http://0.0.0.0;http://::/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
