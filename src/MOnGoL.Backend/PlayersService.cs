@@ -62,7 +62,7 @@ namespace MOnGoL.Backend
                 return false;
 
             var newPlayerState = _playerlist[index] with { Score = _playerlist[index].Score + delta };
-            _playerlist = _playerlist.SetItem(index, newPlayerState);
+            _playerlist = _playerlist.SetItem(index, newPlayerState).OrderByDescending(ps => ps.Score).ToImmutableList();
             OnPlayerlistChanged?.Invoke(this, _playerlist);
             return true;
         }
