@@ -16,13 +16,21 @@ namespace MOnGoL.Frontend.Shared
         [Inject] private IPlayerService PlayerService { get; set; }
         [Inject] private ILocalStorageService LocalStorage { get; set; }
         [Inject] private ILogger<PlayerList> Logger { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; }
 
         private string Name = String.Empty;
         private string Emoji => Emojis.Contains(EmojiText)
             ? EmojiText
-            : EmojiData.Emoji.TryGetEmojiByShortcode(EmojiText.Replace(":","").Trim(), out var emoji)?emoji.ToString():null;
+            : EmojiData.Emoji.TryGetEmojiByShortcode(EmojiText.Replace(":", "").Trim(), out var emoji) ? emoji.ToString() : null;
         private string EmojiText = String.Empty;
+
         private PlayerInfo? MyInfo { get; set; }
+
+        private async void NavigateToGame()
+        {
+            await Task.Delay(100);
+            NavigationManager.NavigateTo("play");
+        }
 
         private HashSet<string> Emojis = new HashSet<string>(EmojiData.Emoji.All.Select(emo => emo.ToString()));
 
@@ -30,13 +38,15 @@ namespace MOnGoL.Frontend.Shared
         {
         }
 
+        private SemaphoreSlim _lock = new SemaphoreSlim(1);
+        private Task<IDisposable> Lock() => _lock.DisposableEnter();
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
-            Logger.LogDebug("Reading my info from PlayerService");
+            using var _ = await Lock();
+            Logger.LogInformation("Reading my info from PlayerService");
             PlayerService.OnMyInfoChanged += OnMyInfoChanged;
             MyInfo = await PlayerService.GetMyInfo();
-            Logger.LogDebug("Got this: '{0}'", MyInfo);
+            Logger.LogInformation("Got this: '{0}'", MyInfo);
         }
 
         private async void OnMyInfoChanged(object sender, PlayerInfo? e)
@@ -50,21 +60,27 @@ namespace MOnGoL.Frontend.Shared
             if (!firstRender)
                 return;
 
+            using var _ = await Lock(); // Prevent doing this DURING init!
+
             if (MyInfo is not null)
                 return;
 
-            Logger.LogDebug("Seeing if I have stored 'PlayerInfo' in localStorage...");
+            Logger.LogInformation("Seeing if I have stored 'PlayerInfo' in localStorage...");
             var storedInfo = await LocalStorage.GetItemAsync<PlayerInfo>("PlayerInfo");
-            Logger.LogDebug("Got this: '{0}'", storedInfo);
+            Logger.LogInformation("Got this: '{0}'", storedInfo);
             if (storedInfo is not null)
             {
-                Logger.LogDebug("Trying to register with stored playerInfo");
+                Logger.LogInformation("Trying to register with stored playerInfo");
                 MyInfo = await PlayerService.Register(storedInfo);
                 if (MyInfo is null)
                 {
-                    Logger.LogDebug("Server refused, apparently that would be a conflict with an already registered player");
+                    Logger.LogInformation("Server refused, apparently that would be a conflict with an already registered player");
                     Name = storedInfo.Name;
                     EmojiText = storedInfo.Token.Emoji.ToString();
+                }
+                else
+                {
+                    NavigateToGame();
                 }
                 this.StateHasChanged();
             }
@@ -91,7 +107,7 @@ namespace MOnGoL.Frontend.Shared
             var max = EmojiData.Emoji.All.Length;
             var steps = 50;
             var power = 1.5;
-            foreach (var delay in Enumerable.Range(0, steps).Select(i => TimeSpan.FromMilliseconds(2000.0 * Math.Pow(power,i) / Math.Pow(power, steps-1))))
+            foreach (var delay in Enumerable.Range(0, steps).Select(i => TimeSpan.FromMilliseconds(2000.0 * Math.Pow(power, i) / Math.Pow(power, steps - 1))))
             {
                 await Task.Delay(delay);
                 if (disposalCts.IsCancellationRequested)
@@ -135,6 +151,7 @@ namespace MOnGoL.Frontend.Shared
                 Logger.LogDebug("Server accepted. Storing this data in LocalStorage now");
                 await LocalStorage.SetItemAsync("PlayerInfo", MyInfo);
                 Logger.LogDebug("Stored");
+                NavigateToGame();
             }
             else
                 Logger.LogDebug("Server refused, apparently that would be a conflict with an already registered player");

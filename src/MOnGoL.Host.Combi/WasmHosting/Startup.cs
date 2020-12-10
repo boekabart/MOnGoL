@@ -13,7 +13,7 @@ namespace MOnGoL.Host.Combi.WasmHosting
 
         public static void Configure(IApplicationBuilder wasm, IWebHostEnvironment _)
         {
-            wasm.UseRewriter(new RewriteOptions().AddRedirect(@"^$", "/home", 301));
+            wasm.UseRewriter(new RewriteOptions().AddRedirect(@"^$", "/login", 301));
 
             wasm.UseBlazorFrameworkFiles();
             wasm.UseStaticFiles();
