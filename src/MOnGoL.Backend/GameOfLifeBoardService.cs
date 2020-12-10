@@ -16,7 +16,7 @@ namespace MOnGoL.Backend
 
         public GameOfLifeBoardService(IPlayersService playersService)
         {
-            _theBoard = Board.Create(21, 21);
+            _theBoard = Board.Create(31, 31);
             LifeStep();
             this.playersService = playersService;
         }
@@ -39,10 +39,10 @@ namespace MOnGoL.Backend
         public EventHandler<int> OnCountdownChanged { get; set; }
         private async void LifeStep()
         {
-            for (var countDown = 8; countDown >= 0; countDown--)
+            for (var countDown = 9; countDown >= 0; countDown--)
             {
                 OnCountdownChanged?.Invoke(this, countDown);
-                await Task.Delay(TimeSpan.FromSeconds(0.25));
+                await Task.Delay(TimeSpan.FromSeconds(0.4));
             }
             using var _ = await _lock.DisposableEnter();
             var changes = GameOfLife.NextGenerationChanges(_theBoard);
