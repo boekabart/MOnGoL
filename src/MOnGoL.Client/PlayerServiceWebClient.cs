@@ -15,11 +15,11 @@ namespace MOnGoL.Backend.Client
             {
                 OnPlayerlistChanged?.Invoke(this, newValue);
             });
-            SignalR.HubConnection.On<PlayerInfo?>("OnMyInfoChanged", newValue =>
+            SignalR.HubConnection.On<PlayerInfo?>("MyInfoChanged", newValue =>
             {
                 OnMyInfoChanged?.Invoke(this, newValue);
             });
-            SignalR.HubConnection.On<int>("OnTokenStockChanged", newValue =>
+            SignalR.HubConnection.On<int>("TokenStockChanged", newValue =>
             {
                 OnTokenStockChanged?.Invoke(this, newValue);
             });
@@ -27,6 +27,10 @@ namespace MOnGoL.Backend.Client
             {
                 ApplyChanges(changes);
                 OnBoardChanged?.Invoke(this, changes);
+            });
+            HubConnection.On<int>("CountdownChanged", countDown =>
+            {
+                OnCountdownChanged?.Invoke(this, countDown);
             });
         }
 
@@ -55,6 +59,17 @@ namespace MOnGoL.Backend.Client
             set
             {
                 onBoardChanged = value;
+                _ = Connect();
+            }
+        }
+
+        private EventHandler<int> onCountdownChanged;
+        public EventHandler<int> OnCountdownChanged
+        {
+            get => onCountdownChanged;
+            set
+            {
+                onCountdownChanged = value;
                 _ = Connect();
             }
         }

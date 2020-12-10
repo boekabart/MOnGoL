@@ -18,6 +18,7 @@ namespace MOnGoL.Backend
             Logger.LogInformation("Created");
             BoardService = boardService;
             BoardService.OnBoardChanged += OnGlobalBoardChanged;
+            BoardService.OnCountdownChanged += OnGlobalCountdownChanged;
         }
 
         private void OnGlobalPlayerlistChanged(object sender, IImmutableList<PlayerState> newPlayerlist)
@@ -74,6 +75,7 @@ namespace MOnGoL.Backend
             await Leave();
             PlayersService.OnPlayerlistChanged -= OnGlobalPlayerlistChanged;
             BoardService.OnBoardChanged -= OnGlobalBoardChanged;
+            BoardService.OnCountdownChanged -= OnGlobalCountdownChanged;
         }
 
         #region TokenStock
@@ -139,6 +141,13 @@ namespace MOnGoL.Backend
         }
 
         public EventHandler<ChangeSet> OnBoardChanged { get; set; }
+
+        private void OnGlobalCountdownChanged(object sender, int countDown)
+        {
+            OnCountdownChanged?.Invoke(this, countDown);
+        }
+
+        public EventHandler<int> OnCountdownChanged { get; set; }
 
         public Task<Board> GetBoard()
         {

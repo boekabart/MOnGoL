@@ -23,10 +23,13 @@ namespace MOnGoL.Frontend.Shared
 
         private PlacedToken? Coor(Coordinate coordinate) => board?.TokenAt(coordinate);
 
+        private int Countdown { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             PlayerService.OnBoardChanged += OnBoardChanged;
+            PlayerService.OnCountdownChanged += OnCountdownChanged;
             PlayerService.OnTokenStockChanged += OnTokenStockChanged;
             board = await PlayerService.GetBoard();
             await SetTokenStock(await PlayerService.GetTokenStock());
@@ -40,6 +43,12 @@ namespace MOnGoL.Frontend.Shared
         private async void OnBoardChanged(object sender, ChangeSet changes)
         {
             board = board.WithChanges(changes);
+            await InvokeAsync(StateHasChanged);
+        }
+
+        private async void OnCountdownChanged(object sender, int countDown)
+        {
+            Countdown = countDown;
             await InvokeAsync(StateHasChanged);
         }
 
@@ -60,6 +69,7 @@ namespace MOnGoL.Frontend.Shared
         public void Dispose()
         {
             PlayerService.OnBoardChanged -= OnBoardChanged;
+            PlayerService.OnCountdownChanged -= OnCountdownChanged;
             PlayerService.OnTokenStockChanged -= OnTokenStockChanged;
         }
 

@@ -26,6 +26,7 @@ namespace MOnGoL.Backend.Controller.Hubs
                 {
                     playerService.OnTokenStockChanged -= OnTokenStockChanged;
                     playerService.OnBoardChanged -= OnBoardChanged;
+                    playerService.OnCountdownChanged -= OnCountdownChanged;
                     playerService.OnMyInfoChanged -= OnMyInfoChanged;
                     playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
                     GroupId = null;
@@ -39,17 +40,22 @@ namespace MOnGoL.Backend.Controller.Hubs
 
             private async void OnTokenStockChanged(object sender, int newStockValue)
             {
-                await hubContext.Clients.Groups(GroupId).SendAsync("OnTokenStockChanged", newStockValue);
+                await hubContext.Clients.Groups(GroupId).SendAsync("TokenStockChanged", newStockValue);
             }
 
             private async void OnMyInfoChanged(object sender, PlayerInfo? e)
             {
-                await hubContext.Clients.Groups(GroupId).SendAsync("OnMyInfoChanged", e);
+                await hubContext.Clients.Groups(GroupId).SendAsync("MyInfoChanged", e);
             }
 
             private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerState> e)
             {
                 await hubContext.Clients.Groups(GroupId).SendAsync("PlayerlistChanged", e);
+            }
+
+            private async void OnCountdownChanged(object sender, int e)
+            {
+                await hubContext.Clients.Groups(GroupId).SendAsync("CountdownChanged", e);
             }
 
             private string? GroupId { get; set; }
@@ -63,6 +69,7 @@ namespace MOnGoL.Backend.Controller.Hubs
                 playerService.OnPlayerlistChanged += OnPlayerlistChanged;
                 playerService.OnMyInfoChanged += OnMyInfoChanged;
                 playerService.OnBoardChanged += OnBoardChanged;
+                playerService.OnCountdownChanged += OnCountdownChanged;
                 playerService.OnTokenStockChanged += OnTokenStockChanged;
                 GroupId = groupId;
             }

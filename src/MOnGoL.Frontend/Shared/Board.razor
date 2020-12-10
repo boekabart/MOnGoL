@@ -1,7 +1,7 @@
 ﻿<div>
     <div>
         <span>Inventory:</span>
-        @foreach( var token in TokenStock)
+        @foreach (var token in TokenStock)
         {
             <span>@token</span>
         }
@@ -35,4 +35,11 @@
             </tr>
         }
     </table>
+    <div>
+        <span><i>Game of Life</i> countdown:</span>
+        @for (var q = 0; q < Countdown; q++)
+        {
+            <span>🕒</span>
+        }
+    </div>
 </div>

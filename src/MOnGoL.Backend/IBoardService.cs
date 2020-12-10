@@ -8,6 +8,7 @@ namespace MOnGoL.Backend
     {
         Task<bool> TryPlaceToken(Coordinate where, Token token);
         EventHandler<ChangeSet> OnBoardChanged { get; set; }
+        EventHandler<int> OnCountdownChanged { get; set; }
 
         Task<Board> GetBoard();
     }

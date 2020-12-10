@@ -17,6 +17,7 @@ namespace MOnGoL.Common
         Task<bool> TryPlaceToken(Coordinate where);
         EventHandler<ChangeSet> OnBoardChanged { get; set; }
         EventHandler<int> OnTokenStockChanged { get; set; }
+        EventHandler<int> OnCountdownChanged { get; set; }
         Task<Board> GetBoard();
         Task<int> GetTokenStock();
         #endregion

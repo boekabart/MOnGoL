@@ -36,9 +36,14 @@ namespace MOnGoL.Backend
             }
         }
 
+        public EventHandler<int> OnCountdownChanged { get; set; }
         private async void LifeStep()
         {
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            for (var countDown = 8; countDown >= 0; countDown--)
+            {
+                OnCountdownChanged?.Invoke(this, countDown);
+                await Task.Delay(TimeSpan.FromSeconds(0.25));
+            }
             using var _ = await _lock.DisposableEnter();
             var changes = GameOfLife.NextGenerationChanges(_theBoard);
             ApplyChanges(changes);
