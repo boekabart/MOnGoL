@@ -18,38 +18,53 @@ namespace MOnGoL.Backend.Controller.Hubs
             {
                 this.hubContext = hubContext;
                 this.playerService = playerService;
-                playerService.OnPlayerlistChanged += OnPlayerlistChanged;
-                playerService.OnMyInfoChanged += OnMyInfoChanged;
-                playerService.OnBoardChanged += OnBoardChanged;
-                playerService.OnTokenStockChanged += OnTokenStockChanged;
             }
 
             public void Dispose()
             {
-                playerService.OnTokenStockChanged -= OnTokenStockChanged;
-                playerService.OnBoardChanged -= OnBoardChanged;
-                playerService.OnMyInfoChanged -= OnMyInfoChanged;
-                playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
+                if (GroupId is not null)
+                {
+                    playerService.OnTokenStockChanged -= OnTokenStockChanged;
+                    playerService.OnBoardChanged -= OnBoardChanged;
+                    playerService.OnMyInfoChanged -= OnMyInfoChanged;
+                    playerService.OnPlayerlistChanged -= OnPlayerlistChanged;
+                    GroupId = null;
+                }
             }
 
             private async void OnBoardChanged(object sender, ChangeSet changeSet)
             {
-                await hubContext.Clients.All.SendAsync("BoardChanged", changeSet);
+                await hubContext.Clients.Groups(GroupId).SendAsync("BoardChanged", changeSet);
             }
 
             private async void OnTokenStockChanged(object sender, int newStockValue)
             {
-                await hubContext.Clients.All.SendAsync("OnTokenStockChanged", newStockValue);
+                await hubContext.Clients.Groups(GroupId).SendAsync("OnTokenStockChanged", newStockValue);
             }
 
             private async void OnMyInfoChanged(object sender, PlayerInfo? e)
             {
-                await hubContext.Clients.All.SendAsync("OnMyInfoChanged", e);
+                await hubContext.Clients.Groups(GroupId).SendAsync("OnMyInfoChanged", e);
             }
 
             private async void OnPlayerlistChanged(object sender, IImmutableList<PlayerState> e)
             {
-                await hubContext.Clients.All.SendAsync("PlayerlistChanged", e);
+                await hubContext.Clients.Groups(GroupId).SendAsync("PlayerlistChanged", e);
+            }
+
+            private string? GroupId { get; set; }
+            internal async Task Subscribe(HubCallerContext context)
+            {
+                if (GroupId is not null)
+                    return;
+
+                var groupId = context.ConnectionId;
+                await hubContext.Groups.AddToGroupAsync(context.ConnectionId, groupId);
+                playerService.OnPlayerlistChanged += OnPlayerlistChanged;
+                playerService.OnMyInfoChanged += OnMyInfoChanged;
+                playerService.OnBoardChanged += OnBoardChanged;
+                playerService.OnTokenStockChanged += OnTokenStockChanged;
+                GroupId = groupId;
             }
         }
 
@@ -111,6 +126,7 @@ namespace MOnGoL.Backend.Controller.Hubs
         {
             var serviceProvider = await ScopeService.GetScope(Context);
             var _ = serviceProvider.GetRequiredService<BroadcastService>();
+            await _.Subscribe(Context);
             return serviceProvider;
         }
     }
