@@ -28,7 +28,7 @@ namespace MOnGoL.Backend.Controller
             });
 
             services.AddSingleton<SignalRScopeService>();
-            services.AddScoped<PlayerHub.BroadcastService>();
+            services.AddScoped<PlayerHub.CallbackService>();
             return services;
         }
 

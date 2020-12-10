@@ -9,12 +9,12 @@ namespace MOnGoL.Backend.Controller.Hubs
 {
     public class PlayerHub : Hub
     {
-        public class BroadcastService : IDisposable
+        public class CallbackService : IDisposable
         {
             private readonly IHubContext<PlayerHub> hubContext;
             private readonly IPlayerService playerService;
 
-            public BroadcastService(IHubContext<PlayerHub> hubContext, IPlayerService playerService)
+            public CallbackService(IHubContext<PlayerHub> hubContext, IPlayerService playerService)
             {
                 this.hubContext = hubContext;
                 this.playerService = playerService;
@@ -125,7 +125,7 @@ namespace MOnGoL.Backend.Controller.Hubs
         private async Task<IServiceProvider> GetScope()
         {
             var serviceProvider = await ScopeService.GetScope(Context);
-            var _ = serviceProvider.GetRequiredService<BroadcastService>();
+            var _ = serviceProvider.GetRequiredService<CallbackService>();
             await _.Subscribe(Context);
             return serviceProvider;
         }
