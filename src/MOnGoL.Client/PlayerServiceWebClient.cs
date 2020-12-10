@@ -25,7 +25,6 @@ namespace MOnGoL.Backend.Client
             });
             HubConnection.On<ChangeSet>("BoardChanged", changes =>
             {
-                ApplyChanges(changes);
                 OnBoardChanged?.Invoke(this, changes);
             });
             HubConnection.On<int>("CountdownChanged", countDown =>
@@ -33,13 +32,6 @@ namespace MOnGoL.Backend.Client
                 OnCountdownChanged?.Invoke(this, countDown);
             });
         }
-
-        private void ApplyChanges(ChangeSet changes)
-        {
-            _theBoard = _theBoard?.WithChanges(changes);
-        }
-
-        private Board _theBoard;
 
         private EventHandler<int> onTokenStockChanged;
         public EventHandler<int> OnTokenStockChanged
@@ -82,11 +74,8 @@ namespace MOnGoL.Backend.Client
 
         public async Task<Board> GetBoard()
         {
-            if (_theBoard is not null)
-                return _theBoard;
             await Connect();
-            _theBoard = await HubConnection.InvokeAsync<Board>("GetBoard");
-            return _theBoard;
+            return await HubConnection.InvokeAsync<Board>("GetBoard");
         }
 
         private EventHandler<IImmutableList<PlayerState>> onPlayerlistChanged;
