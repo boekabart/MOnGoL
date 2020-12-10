@@ -1,13 +1,15 @@
 ﻿@if (MyInfo is null)
 {
+    var emojiClass = EmojiInvalid ? "bg-danger" : "bg-success";
+    var nameClass = NameInvalid ? "bg-danger" : "bg-success";
     <div>
         <div class="form-group">
             <span>Name:</span>
-            <input @bind="Name" @bind:event="oninput" />
+            <input @bind="Name" @bind:event="oninput"  class="@nameClass"  />
         </div>
         <div class="form-group">
             <span>Emoji (name or copy/paste):</span>
-            <input @bind="EmojiText" @bind:event="oninput" />
+            <input @bind="EmojiText" @bind:event="oninput" class="@emojiClass" />
             <button class="btn btn-secondary" @onclick="RandomEmoji" disabled="@(!CanRandom)">🔀</button>
         </div>
         <div class="form-group">

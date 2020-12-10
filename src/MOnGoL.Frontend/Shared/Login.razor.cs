@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using MOnGoL.Common;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,11 +18,11 @@ namespace MOnGoL.Frontend.Shared
         [Inject] private ILocalStorageService LocalStorage { get; set; }
         [Inject] private ILogger<PlayerList> Logger { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
-
+         
         private string Name = String.Empty;
         private string Emoji => Emojis.Contains(EmojiText)
             ? EmojiText
-            : EmojiData.Emoji.TryGetEmojiByShortcode(EmojiText.Replace(":", "").Trim(), out var emoji) ? emoji.ToString() : null;
+            : EmojiData.Emoji.TryGetEmojiByShortcode(EmojiText.Replace(":", "").Trim(), out var emoji) ? emoji.ToString() : String.Empty;
         private string EmojiText = String.Empty;
 
         private PlayerInfo? MyInfo { get; set; }
@@ -49,7 +50,20 @@ namespace MOnGoL.Frontend.Shared
             PlayerService.OnMyInfoChanged += OnMyInfoChanged;
             MyInfo = await PlayerService.GetMyInfo();
             Logger.LogInformation("Got this: '{0}'", MyInfo);
+
+            Logger.LogDebug("Reading playerList from PlayerService");
+            PlayerService.OnPlayerlistChanged += OnNewPlayerlist;
+            playerList = await PlayerService.GetPlayerlist();
         }
+        private IImmutableList<PlayerState>? playerList = null;
+        private async void OnNewPlayerlist(object sender, IImmutableList<PlayerState> newValue)
+        {
+            playerList = newValue;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        private bool NameInvalid => Name.Length == 0 || (playerList is not null && playerList.Any(ps => ps.PlayerInfo.Name.Equals(Name)));
+        private bool EmojiInvalid => Emoji.Length == 0 || Emoji == Board.DummyEmoji || (playerList is not null && playerList.Any(ps => ps.PlayerInfo.Token.Emoji.Equals(Emoji)));
 
         private async void OnMyInfoChanged(object sender, PlayerInfo? e)
         {
@@ -94,7 +108,7 @@ namespace MOnGoL.Frontend.Shared
             }
         }
 
-        private bool CanRegister => !string.IsNullOrEmpty(Name) && Emoji is not null && Emoji != Board.DummyEmoji;
+        private bool CanRegister => !(NameInvalid || EmojiInvalid);
         private bool CanRandom => RandomTask is null;
         private Task RandomTask { get; set; }
 
@@ -134,10 +148,13 @@ namespace MOnGoL.Frontend.Shared
 
         private async Task Leave()
         {
-            if (MyInfo is not null)
+            var myInfo = MyInfo;
+            if (myInfo is not null)
             {
-                await PlayerService.Leave();
                 MyInfo = null;
+                await PlayerService.Leave();
+                EmojiText = myInfo.Token.Emoji;
+                Name = myInfo.Name;
             }
         }
 
@@ -169,6 +186,7 @@ namespace MOnGoL.Frontend.Shared
         {
             disposalCts.Cancel();
             PlayerService.OnMyInfoChanged -= OnMyInfoChanged;
+            PlayerService.OnPlayerlistChanged -= OnNewPlayerlist;
         }
     }
 }
