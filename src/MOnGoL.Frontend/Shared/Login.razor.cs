@@ -28,8 +28,10 @@ namespace MOnGoL.Frontend.Shared
 
         private async void NavigateToGame()
         {
-            await Task.Delay(100);
-            NavigationManager.NavigateTo("play");
+            await Task.Delay(1000);
+            // Double check after this second...
+            if (MyInfo is not null)
+                NavigationManager.NavigateTo("play");
         }
 
         private HashSet<string> Emojis = new HashSet<string>(EmojiData.Emoji.All.Select(emo => emo.ToString()));
