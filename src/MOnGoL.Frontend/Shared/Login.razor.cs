@@ -72,6 +72,12 @@ namespace MOnGoL.Frontend.Shared
             Logger.LogInformation("Got this: '{0}'", storedInfo);
             if (storedInfo is not null)
             {
+                if (Name.Length == 0 && EmojiText.Length == 0)
+                {
+                    Name = storedInfo.Name;
+                    EmojiText = storedInfo.Token.Emoji.ToString();
+                }
+/*
                 Logger.LogInformation("Trying to register with stored playerInfo");
                 MyInfo = await PlayerService.Register(storedInfo);
                 if (MyInfo is null)
@@ -83,7 +89,7 @@ namespace MOnGoL.Frontend.Shared
                 else
                 {
                     NavigateToGame();
-                }
+                }*/
                 this.StateHasChanged();
             }
         }
