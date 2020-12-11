@@ -18,7 +18,7 @@ namespace MOnGoL.Frontend.Shared
         [Inject] private ILocalStorageService LocalStorage { get; set; }
         [Inject] private ILogger<PlayerList> Logger { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
-         
+
         private string Name = String.Empty;
         private string Emoji => Emojis.Contains(EmojiText)
             ? EmojiText
@@ -91,19 +91,19 @@ namespace MOnGoL.Frontend.Shared
                     Name = storedInfo.Name;
                     EmojiText = storedInfo.Token.Emoji.ToString();
                 }
-/*
-                Logger.LogInformation("Trying to register with stored playerInfo");
-                MyInfo = await PlayerService.Register(storedInfo);
-                if (MyInfo is null)
-                {
-                    Logger.LogInformation("Server refused, apparently that would be a conflict with an already registered player");
-                    Name = storedInfo.Name;
-                    EmojiText = storedInfo.Token.Emoji.ToString();
-                }
-                else
-                {
-                    NavigateToGame();
-                }*/
+                /*
+                                Logger.LogInformation("Trying to register with stored playerInfo");
+                                MyInfo = await PlayerService.Register(storedInfo);
+                                if (MyInfo is null)
+                                {
+                                    Logger.LogInformation("Server refused, apparently that would be a conflict with an already registered player");
+                                    Name = storedInfo.Name;
+                                    EmojiText = storedInfo.Token.Emoji.ToString();
+                                }
+                                else
+                                {
+                                    NavigateToGame();
+                                }*/
                 this.StateHasChanged();
             }
         }

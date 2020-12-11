@@ -17,8 +17,8 @@ namespace MOnGoL.Common
         }
 
         public static IEnumerable<(Coordinate Coordinate, PlacedToken? Token)> GetRow(this Board aBoard, int rowNumber)
-            => aBoard.Tokens[(rowNumber*aBoard.Width)..((rowNumber+1)*aBoard.Width)]
-            .Select((t,i) => (new Coordinate(i, rowNumber),t));
+            => aBoard.Tokens[(rowNumber * aBoard.Width)..((rowNumber + 1) * aBoard.Width)]
+            .Select((t, i) => (new Coordinate(i, rowNumber), t));
         public static IEnumerable<(Coordinate Coordinate, PlacedToken? Token)> GetColumn(this Board aBoard, int columnNumber)
             => Enumerable.Range(0, aBoard.Height).Select(rowNumber => new Coordinate(columnNumber, rowNumber)).Select(coor => (coor, aBoard.TokenAt(coor)));
         public static IEnumerable<IEnumerable<(Coordinate Coordinate, PlacedToken? Token)>> GetRows(this Board aBoard)
@@ -37,12 +37,12 @@ namespace MOnGoL.Common
             .Select(startColumnNumber => aBoard.GetSlash(startColumnNumber));
         public static IEnumerable<(Coordinate Coordinate, PlacedToken? Token)> GetBackslash(this Board aBoard, int startColumnNumber)
             => Enumerable.Range(0, aBoard.Height)
-            .Select(index =>new Coordinate(index + startColumnNumber, index))
+            .Select(index => new Coordinate(index + startColumnNumber, index))
             .Where(coor => aBoard.IsValidCoordinate(coor))
-            .Select(coor =>(coor, aBoard.TokenAt(coor)));
+            .Select(coor => (coor, aBoard.TokenAt(coor)));
         public static IEnumerable<IEnumerable<(Coordinate Coordinate, PlacedToken? Token)>> GetBackslashes(this Board aBoard)
-            => Enumerable.Range(1-aBoard.Height, aBoard.Width + aBoard.Height - 1)
-            .Select(startColumnNumber => aBoard.GetBackslash(startColumnNumber)); 
+            => Enumerable.Range(1 - aBoard.Height, aBoard.Width + aBoard.Height - 1)
+            .Select(startColumnNumber => aBoard.GetBackslash(startColumnNumber));
         public static IEnumerable<IEnumerable<(Coordinate Coordinate, PlacedToken? Token)>> GetRowsColumnsAndDiagonals(this Board aBoard)
             => aBoard.GetRowsAndColumns().Concat(aBoard.GetSlashes()).Concat(aBoard.GetBackslashes());
 

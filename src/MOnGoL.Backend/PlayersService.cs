@@ -45,7 +45,7 @@ namespace MOnGoL.Backend
             using var _ = await Lock();
             if (_playerlist.Any(ps => ps.PlayerInfo.Name.Equals(myInfo.Name) || ps.PlayerInfo.Token.Equals(myInfo.Token)))
                 return null;
-            _playerlist = _playerlist.Add(new PlayerState(myInfo,0));
+            _playerlist = _playerlist.Add(new PlayerState(myInfo, 0));
             OnPlayerlistChanged?.Invoke(this, _playerlist);
             Logger.LogInformation($"Player {myInfo.Name} joined; {_playerlist.Count} in list");
             return myInfo;

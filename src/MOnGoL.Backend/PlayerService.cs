@@ -27,7 +27,7 @@ namespace MOnGoL.Backend
         }
 
         public EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set; }
-        public EventHandler<PlayerInfo?> OnMyInfoChanged { get; set;  }
+        public EventHandler<PlayerInfo?> OnMyInfoChanged { get; set; }
         private IPlayersService PlayersService { get; }
         private PlayerInfo? _myInfo;
 

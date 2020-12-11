@@ -17,7 +17,7 @@ namespace MOnGoL.Common
 
         Task<IImmutableList<PlayerState>> GetPlayerlist();
         EventHandler<IImmutableList<PlayerState>> OnPlayerlistChanged { get; set; }
-        
+
         Task<PlayerInfo> GetMyInfo();
         EventHandler<PlayerInfo> OnMyInfoChanged { get; set; }
 
