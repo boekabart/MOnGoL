@@ -8,14 +8,8 @@ namespace MOnGoL.Frontend.Shared
     public partial class LoginButton : IDisposable
     {
         [Inject] private IPlayerService PlayerService { get; set; }
-        [Inject] private NavigationManager NavigationManager { get; set; }
 
         private bool IsLoggedIn { get; set; }
-
-        private void NavigateToLogin()
-        {
-            NavigationManager.NavigateTo("login");
-        }
 
         protected override async Task OnInitializedAsync()
         {
