@@ -1,38 +1,29 @@
-﻿<div>
-    <div>
-        <span>Inventory:</span>
-        @foreach (var token in TokenStock)
-        {
-            <span>@token</span>
-        }
-    </div>
-    <table class="table table-bordered">
-        @if (board is not null)
-        {
-            @foreach (var row in Rows)
-            {
-                <tr>
-                    @foreach (var coor in row)
-                    {
-                        var token = @Coor(coor);
-                        if (token is null)
-                        {
-                            <td class="p-0 text-center align-middle text-white" @onclick="@(e => Put(coor))" width="23px" height="23px">@DummyEmoji</td>
-                        }
-                        else
-                        {
-                            var bg = token.Scored ? "bg-warning" : "";
-                            <td class="p-0 text-center align-middle @bg" width="23px" height="23px">@token.Emoji</td>
-                        }
-                    }
-                </tr>
-            }
-        }
-        else
+﻿<table class="table table-bordered">
+    @if (board is not null)
+    {
+        @foreach (var row in Rows)
         {
             <tr>
-                <td>Loading...</td>
+                @foreach (var coor in row)
+                {
+                    var token = @Coor(coor);
+                    if (token is null)
+                    {
+                        <td class="p-0 text-center align-middle text-white" @onclick="@(e => Put(coor))" width="25px" height="25px">@DummyEmoji</td>
+                    }
+                    else
+                    {
+                        var bg = token.Scored ? "bg-warning" : "";
+                        <td class="p-0 text-center align-middle @bg" width="25px" height="25px">@token.Emoji</td>
+                    }
+                }
             </tr>
         }
-    </table>
-</div>
+    }
+    else
+    {
+        <tr>
+            <td>Loading...</td>
+        </tr>
+    }
+</table>
